@@ -1,0 +1,36 @@
+{
+  "name": "basin-viewer",
+  "description": "SI-CAT project",
+  "version": "1.0.0",
+  "author": "Takao NAITO <xarsh@outlook.com>",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+  },
+  "dependencies": {
+    "express": "^4.15.3",
+    "mongodb": "^2.2.29",
+    "vue": "^2.3.2"
+  },
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-latest": "^6.24.1",
+    "chart.js": "^2.6.0",
+    "cross-env": "^4.0.0",
+    "css-loader": "^0.28.1",
+    "eslint": "^3.19.0",
+    "eslint-plugin-html": "^2.0.1",
+    "file-loader": "^0.11.1",
+    "node-sass": "^4.5.2",
+    "pug": "^2.0.0-rc.1",
+    "sass-loader": "^6.0.3",
+    "vue-chartjs": "^2.6.5",
+    "vue-loader": "^12.0.3",
+    "vue-template-compiler": "^2.3.2",
+    "vue2-leaflet": "0.0.50",
+    "webpack": "^2.4.1",
+    "webpack-dev-server": "^2.4.5"
+  }
+}
