@@ -7,6 +7,7 @@ collection = client[:record]
 
 records = []
 JSON.parse(File.read('./japan-basin.geojson'))['features'].each do |f|
+  next if f['geometry']['coordinates'].empty?
   att = f['properties']
   records.push({
     mesh_code: att['W07_001'].to_i,

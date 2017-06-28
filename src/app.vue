@@ -4,7 +4,8 @@
   v-map(:zoom=10, :center="[35, 136]", @l-click="onClick")
     v-tilelayer(url="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png")
     .loop(v-for="item in items")
-      v-polygon(:latLngs="item.loc", :lStyle='{color: "#ff7800", weight: 1}')
+      .polygons(v-for="polygon in item.loc.coordinates")
+        v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: "#ff7800", weight: 1}')
 </template>
 
 <script>
@@ -22,12 +23,12 @@ export default {
       .then(res => res.json())
       .then(res => {
         if(res.length === 0) return;
-        res.forEach(r => {
-          r.loc = r.loc.coordinates[0].map(p => [p[1], p[0]]);
-        });
         this.items = res;
         this.setGraphData(res);
       });
+    },
+    swapLatLng(polygon) {
+      return polygon[0].map(n => [n[1], n[0]]);
     },
     setGraphData(data) {
       if(this.items.length === 0) return;
