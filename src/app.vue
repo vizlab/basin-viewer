@@ -19,7 +19,7 @@ export default {
   }),
   methods: {
     onClick(e) {
-      fetch(`http://localhost:3000?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
+      fetch(`/basin?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
       .then(res => res.json())
       .then(res => {
         if(res.length === 0) return;
