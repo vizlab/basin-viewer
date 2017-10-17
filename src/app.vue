@@ -1,50 +1,85 @@
 <template lang="pug">
 #app
-  #chart: graph(:chart-data="graphData")
-  v-map(:zoom=10, :center="[35, 136]", @l-click="onClick")
-    v-tilelayer(url="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png")
-    .loop(v-for="item in items")
-      .polygons(v-for="polygon in item.loc.coordinates")
-        v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: "#ff7800", weight: 1}')
+  #controller
+    dl
+      dt Period
+      dd
+        datepicker(v-model="start", format="yyyy/MM/dd")
+        span  ~ 
+        datepicker(v-model="end", format="yyyy/MM/dd")
+      dt Include upstream basins
+      dd: input(type="checkbox", v-model="includeUpstreamBasins")
+      dt Map type
+      dd: select(v-model="map")
+        option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") Ordinary
+        option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda
+    hr
+    .information(v-if="basins.length > 0")
+      p Selected river: {{ basins[0].properties.W07_005 }}
+      p Upstreams: {{ basins.map(b => b.properties.W07_005).join(', ') }}
+  v-map(:zoom=10, :center="[35.4233, 136.7607]", @l-click="onClick")
+    v-tilelayer(:url="map")
+    .loop(v-for="basin in basins")
+      .polygons(v-for="polygon in basin.geometry.coordinates")
+        v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(basin), weight: 1}')
+  #chart: highcharts(:options="graphData")
 </template>
 
 <script>
-import Graph from './graph.vue';
+import Datepicker from 'vuejs-datepicker';
 
 export default {
-  components: { Graph },
+  components: {Datepicker},
   data: () => ({
-    items: [],
-    graphData: {}
+    basins: [],
+    map: 'http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png',
+    start: new Date('2050/09/01'),
+    end: new Date('2050/09/30'),
+    includeUpstreamBasins: true,
+    graphData: {title: {text: null}, chart: {height: window.innerHeight/2}}
   }),
   methods: {
+    polygonColor(basin) {
+      if(basin.properties.W07_003 === this.basins[0].properties.W07_003) return '#0078ff';
+      return basin.properties.W07_003.endsWith('0000') ? '#33333' : '#ff7800';
+    },
     onClick(e) {
-      fetch(`/basin?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
+      fetch(`http://localhost:8081/basin?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
       .then(res => res.json())
       .then(res => {
         if(res.length === 0) return;
-        this.items = res;
-        this.setGraphData(res);
+        this.basins = res.basins;
+        this.setGraphData(res.rainfall);
       });
     },
     swapLatLng(polygon) {
       return polygon[0].map(n => [n[1], n[0]]);
     },
-    setGraphData(data) {
-      if(this.items.length === 0) return;
-      const labels = Object.keys(this.items[0].rainfall);
-      const datasets = [];
-      this.items.forEach(item => {
-        const data = Object.keys(item.rainfall).sort((a, b) => {
-          const a2 = a.slice(0,5).split('Z').reverse().join('');
-          const b2 = b.slice(0,5).split('Z').reverse().join('');
-          if(a2 > b2) return -1;
-          if(a2 < b2) return 1;
-          return 0;
-        }).map(key => item.rainfall[key]);
-        datasets.push({data, label: `${item.river_name}（水系：${item.valley_name}）`, backgroundColor: '#f87979'});
+    setGraphData(rainfall) {
+      if(this.basins.length === 0) return;
+      const labels = Object.keys(rainfall).map(r => {
+        const d = new Date(`${r.slice(8,12)}/${r.slice(5,8)}/${r.slice(3,5)} ${r.slice(0,2)}:00`);
+        d.setTime(d.getTime() - d.getTimezoneOffset()*60*1000);
+        return d.toISOString().replace(/-/g, '/').replace('T', ' ').slice(0, 16);
       });
-      this.graphData = {datasets, labels};
+      const data = Object.keys(rainfall).sort((a, b) => {
+        const a2 = a.slice(0,5).split('Z').reverse().join('');
+        const b2 = b.slice(0,5).split('Z').reverse().join('');
+        return a2 > b2 ? -1 : 1;
+      }).map(key => rainfall[key]);
+      this.graphData = {
+        chart: {height: window.innerHeight/2},
+        title: {text: null},
+        xAxis: {categories: labels, tickInterval: 48},
+        yAxis: {title: { text: 'Rainfall' }},
+        series: [
+          {name: 'Ensemble 1', data},
+          {name: 'Ensemble 2', data: data.map(n => n * Math.random())},
+          {name: 'Ensemble 3', data: data.map(n => n * Math.random() * 2)},
+          {name: 'Ensemble 4', data: data.map(n => n * Math.random() * 4)},
+          {name: 'Ensemble 5', data: data.map(n => n * Math.random() * 8)},
+        ]
+      }
     }
   }
 }
@@ -54,16 +89,26 @@ export default {
 html, body, #app
   height: 100%
   margin: 0
-.vue2leaflet-map.leaflet-container
+.vue2leaflet-map.leaflet-container, #controller
   width: 50%
-  float: right
-#chart
-  width: 50%
-  height: 100vh
+  height: 50vh
+#controller
   float: left
+  dt
+    float: left
+    margin: 0 10px
+  .vdp-datepicker
+    display: inline-block
+  .information
+    padding: 0 10px
+.vue2leaflet-map.leaflet-container
+  float: right
+  cursor: crosshair
+#chart
+  position: fixed
+  top: 50%
+  width: 100%
+  height: 50vh
 #app
   font-family: 'Avenir', Helvetica, Arial, sans-serif
-
-#app > div
-  cursor: crosshair
 </style>

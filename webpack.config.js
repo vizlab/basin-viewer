@@ -11,6 +11,7 @@ module.exports = {
   module: {
     rules: [
       {test: /\.vue$/, loader: 'vue-loader', options: {loaders: {sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax'}}},
+      {test: /\.css$/, loader: 'css-loader'},
       {test: /\.js$/, loader: 'babel-loader', exclude: /node_modules/}
     ]
   },
@@ -24,7 +25,7 @@ module.exports = {
     noInfo: true
   },
   performance: {hints: false},
-  devtool: '#eval-source-map'
+  devtool: '#inline-source-map'
 }
 
 if (process.env.NODE_ENV === 'production') {
