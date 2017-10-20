@@ -79,10 +79,10 @@ export default {
           {name: 'Ensemble 4', data: data.map(n => n * Math.random() * 4)},
           {name: 'Ensemble 5', data: data.map(n => n * Math.random() * 8)},
         ]
-      }
+      };
     }
   }
-}
+};
 </script>
 
 <style lang="sass">
