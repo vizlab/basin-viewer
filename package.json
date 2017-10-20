@@ -17,16 +17,17 @@
   "dependencies": {
     "express": "^4.15.4",
     "highcharts": "^5.0.14",
+    "lit-html": "^0.7.1",
     "lodash": "^4.17.4",
     "mongodb": "^2.2.31",
     "vue": "^2.4.2",
-    "vue-highcharts": "0.0.10",
     "vue2-leaflet": "0.0.51",
     "vuejs-datepicker": "^0.9.9"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
     "babel-preset-latest": "^6.24.1",
     "cross-env": "^5.0.5",
     "css-loader": "^0.28.5",

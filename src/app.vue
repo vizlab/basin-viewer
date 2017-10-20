@@ -22,7 +22,7 @@
     .loop(v-for="basin in basins")
       .polygons(v-for="polygon in basin.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(basin), weight: 1}')
-  #chart: basic-line-chart(:rainfall="rainfall")
+  #chart: viz-basic-line-chart(ref="chart", y-axis-title="rainfall")
 </template>
 
 <script>
@@ -55,7 +55,6 @@ export default {
   components: {Datepicker},
   data: () => ({
     basins: [],
-    rainfall: {},
     map: 'http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png',
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
@@ -72,7 +71,7 @@ export default {
       .then(res => {
         if(res.length === 0) return;
         this.basins = res.basins;
-        this.rainfall = convertRainfallData(res.rainfall);
+        this.$refs.chart.load(convertRainfallData(res.rainfall));
       });
     },
     swapLatLng(polygon) {
