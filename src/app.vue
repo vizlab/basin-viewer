@@ -22,7 +22,7 @@
     .loop(v-for="basin in basins")
       .polygons(v-for="polygon in basin.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(basin), weight: 1}')
-  #chart: highcharts(:options="graphData")
+  #chart: basic-line-chart(:rainfall="rainfall")
 </template>
 
 <script>
@@ -32,11 +32,11 @@ export default {
   components: {Datepicker},
   data: () => ({
     basins: [],
+    rainfall: {},
     map: 'http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png',
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
-    includeUpstreamBasins: true,
-    graphData: {title: {text: null}, chart: {height: window.innerHeight/2}}
+    includeUpstreamBasins: true
   }),
   methods: {
     polygonColor(basin) {
@@ -44,42 +44,16 @@ export default {
       return basin.properties.W07_003.endsWith('0000') ? '#33333' : '#ff7800';
     },
     onClick(e) {
-      fetch(`http://localhost:8081/basin?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
+      fetch(`/basin?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
       .then(res => res.json())
       .then(res => {
         if(res.length === 0) return;
         this.basins = res.basins;
-        this.setGraphData(res.rainfall);
+        this.rainfall = res.rainfall;
       });
     },
     swapLatLng(polygon) {
       return polygon[0].map(n => [n[1], n[0]]);
-    },
-    setGraphData(rainfall) {
-      if(this.basins.length === 0) return;
-      const labels = Object.keys(rainfall).map(r => {
-        const d = new Date(`${r.slice(8,12)}/${r.slice(5,8)}/${r.slice(3,5)} ${r.slice(0,2)}:00`);
-        d.setTime(d.getTime() - d.getTimezoneOffset()*60*1000);
-        return d.toISOString().replace(/-/g, '/').replace('T', ' ').slice(0, 16);
-      });
-      const data = Object.keys(rainfall).sort((a, b) => {
-        const a2 = a.slice(0,5).split('Z').reverse().join('');
-        const b2 = b.slice(0,5).split('Z').reverse().join('');
-        return a2 > b2 ? -1 : 1;
-      }).map(key => rainfall[key]);
-      this.graphData = {
-        chart: {height: window.innerHeight/2},
-        title: {text: null},
-        xAxis: {categories: labels, tickInterval: 48},
-        yAxis: {title: { text: 'Rainfall' }},
-        series: [
-          {name: 'Ensemble 1', data},
-          {name: 'Ensemble 2', data: data.map(n => n * Math.random())},
-          {name: 'Ensemble 3', data: data.map(n => n * Math.random() * 2)},
-          {name: 'Ensemble 4', data: data.map(n => n * Math.random() * 4)},
-          {name: 'Ensemble 5', data: data.map(n => n * Math.random() * 8)},
-        ]
-      };
     }
   }
 };
