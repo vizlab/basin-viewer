@@ -1,3 +1,5 @@
+/*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
+
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -6,8 +8,8 @@ const _ = require('lodash');
 
 app.use('/dist', express.static('dist'));
 
-const connections = require('./connections.json');
-const rainfall = require('./rainfall.json');
+const connections = require('./data/connections.json');
+const rainfall = require('./data/rainfall.json');
 
 const getAllUpstreamCodes = river_code => {
   let codeList = [river_code];
@@ -39,7 +41,7 @@ MongoClient.connect('mongodb://localhost:27017/sicat', (err, db) => {
         return res.json({basins: result.concat(result2), rainfall});
       });
     });
-  })
+  });
 
-  app.listen(process.env.PORT || 8081, () => console.log('started.'));
+  app.listen(process.env.PORT || 3000, () => console.log('started.'));
 });
