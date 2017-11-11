@@ -14,7 +14,7 @@ $ npm install
 ### MongoDB
 
 ```shell-session
-$ docker run --name sicat-mongo -p 27017:27017 mongo
+$ docker run -p 27017:27017 -v `pwd`/mongo:/data/db mongo
 ```
 
 ### Data Initialization
