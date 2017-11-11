@@ -18,11 +18,11 @@
     "express": "^4.15.4",
     "highcharts": "^5.0.14",
     "lit-html": "^0.7.1",
-    "lodash": "^4.17.4",
-    "mongodb": "^2.2.31",
+    "pg": "^7.4.0",
     "vue": "^2.4.2",
     "vue2-leaflet": "0.0.51",
-    "vuejs-datepicker": "^0.9.9"
+    "vuejs-datepicker": "^0.9.9",
+    "wkx": "^0.4.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

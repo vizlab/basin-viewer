@@ -15,8 +15,6 @@
         option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda
     hr
     .information(v-if="basins.length > 0")
-      p Selected river: {{ basins[0].properties.W07_005 }}
-      p Upstreams: {{ basins.map(b => b.properties.W07_005).join(', ') }}
   v-map(:zoom=10, :center="[35.4233, 136.7607]", @l-click="onClick")
     v-tilelayer(:url="map")
     .loop(v-for="basin in basins")
@@ -27,29 +25,6 @@
 
 <script>
 import Datepicker from 'vuejs-datepicker';
-
-const convertRainfallData = rainfall => {
-  const labels = Object.keys(rainfall).map(r => {
-    const d = new Date(`${r.slice(8,12)}/${r.slice(5,8)}/${r.slice(3,5)} ${r.slice(0,2)}:00`);
-    d.setTime(d.getTime() - d.getTimezoneOffset()*60*1000);
-    return d.toISOString().replace(/-/g, '/').replace('T', ' ').slice(0, 16);
-  });
-  const data = Object.keys(rainfall).sort((a, b) => {
-    const a2 = a.slice(0,5).split('Z').reverse().join('');
-    const b2 = b.slice(0,5).split('Z').reverse().join('');
-    return a2 > b2 ? -1 : 1;
-  }).map(key => rainfall[key]);
-  return {
-    labels,
-    ensembles: [
-      {name: 'Ensemble 1', data},
-      {name: 'Ensemble 2', data: data.map(n => n * Math.random())},
-      {name: 'Ensemble 3', data: data.map(n => n * Math.random() * 2)},
-      {name: 'Ensemble 4', data: data.map(n => n * Math.random() * 4)},
-      {name: 'Ensemble 5', data: data.map(n => n * Math.random() * 8)},
-    ]
-  };
-};
 
 export default {
   components: {Datepicker},
@@ -62,17 +37,19 @@ export default {
   }),
   methods: {
     polygonColor(basin) {
-      if(basin.properties.W07_003 === this.basins[0].properties.W07_003) return '#0078ff';
-      return basin.properties.W07_003.endsWith('0000') ? '#33333' : '#ff7800';
+      return basin.id === 40 ? '#ff7800' : '#333333';
     },
     onClick(e) {
-      fetch(`/basin?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
-      .then(res => res.json())
-      .then(res => {
-        if(res.length === 0) return;
-        this.basins = res.basins;
-        this.$refs.chart.load(convertRainfallData(res.rainfall));
-      });
+      fetch(`/rains?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
+        .then(res => res.json())
+        .then(data => {
+          this.$refs.chart.load(data);
+        });
+      fetch('/cells')
+        .then(res => res.json())
+        .then(data => {
+          this.basins = data;
+        });
     },
     swapLatLng(polygon) {
       return polygon[0].map(n => [n[1], n[0]]);
