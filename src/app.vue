@@ -2,11 +2,14 @@
 #app
   #controller
     dl
+      dt Experiment
+      dd: select(v-model="selectedExperimentId")
+        option(v-for="experiment in experiments", :value="experiment.id") {{experiment.nameenglish}}
       dt Period
       dd
-        datepicker(v-model="start", format="yyyy/MM/dd")
+        datepicker(v-model="start", format="yyyy/MM/dd" :disabled="disabledDates")
         span  ~ 
-        datepicker(v-model="end", format="yyyy/MM/dd")
+        datepicker(v-model="end", format="yyyy/MM/dd" :disabled="disabledDates")
       dt Map type
       dd: select(v-model="map")
         option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") Ordinary
@@ -32,20 +35,35 @@ export default {
       .then(data => {
         this.cells = data;
       });
+    fetch('/experiments')
+      .then(res => res.json())
+      .then(data => {
+        this.experiments = data;
+        this.selectedExperimentId = data[0].id;
+      });
   },
   data: () => ({
     cells: [],
     selectedCell: null,
+    experiments: [],
+    selectedExperimentId: null,
     map: 'http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png',
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
+    disabledDates: {},
   }),
   methods: {
     polygonColor(cell) {
       return this.selectedCell && cell.id === this.selectedCell.id ? '#ff7800' : '#333333';
     },
     onClick(e) {
-      fetch(`/rains?lon=${e.latlng.lng}&lat=${e.latlng.lat}`)
+      const params = new URLSearchParams();
+      params.set('lon', e.latlng.lng);
+      params.set('lat', e.latlng.lat);
+      params.set('experimentId', this.selectedExperimentId);
+      params.set('startDate', this.start);
+      params.set('endDate', this.end);
+      fetch(`/rains?${params.toString()}`)
         .then(res => res.json())
         .then(data => {
           this.selectedCell = data.cell;
@@ -54,6 +72,19 @@ export default {
     },
     swapLatLng(polygon) {
       return polygon[0].map(n => [n[1], n[0]]);
+    }
+  },
+  watch: {
+    selectedExperimentId (val) {
+      const experiment = this.experiments.find(e => e.id === this.selectedExperimentId);
+      const start = new Date(experiment.start_date);
+      const end = new Date(experiment.end_date);
+      this.start = start;
+      this.end = end;
+      this.disabledDates = {
+        to: start,
+        from: end,
+      };
     }
   }
 };

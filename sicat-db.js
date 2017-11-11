@@ -54,7 +54,7 @@ exports.getSimulations = experimentId => {
     .catch(e => console.error(e.stack));
 };
 
-exports.getDatetimes = (startDateString, stopDateString) => {
+exports.getDatetimes = (startDate, endDate) => {
   const query = `
     SELECT *
     FROM m_datetime
@@ -62,12 +62,12 @@ exports.getDatetimes = (startDateString, stopDateString) => {
       AND datetime < $2::TIMESTAMP
     ORDER BY datetime
   `;
-  return pool.query(query, [startDateString, stopDateString])
+  return pool.query(query, [startDate, endDate])
     .then(res => res.rows)
     .catch(e => console.error(e.stack));
 };
 
-exports.getRains = (cellId, startDateString, stopDateString) => {
+exports.getRains = (cellId, startDate, endDate) => {
   const query = `
   SELECT *
   FROM sd_rain JOIN m_datetime ON sd_rain.datetimeid = m_datetime.id
@@ -76,7 +76,7 @@ exports.getRains = (cellId, startDateString, stopDateString) => {
     AND m_datetime.datetime < $3::TIMESTAMP
   ORDER BY simulationid, m_datetime.datetime
   `;
-  return pool.query(query, [cellId, startDateString, stopDateString])
+  return pool.query(query, [cellId, startDate, endDate])
     .then(res => res.rows)
     .catch(e => console.error(e.stack));
 };

@@ -39,15 +39,14 @@ app.get('/cells', async (req, res) => {
 });
 
 app.get('/rains', async (req, res) => {
-  const {lat, lon} = req.query;
+  const {lat, lon, experimentId, startDate, endDate} = req.query;
   const cellType = 1;
-  const simulationId = 2;
-  const start = '2010-09-01 00:00:00';
-  const stop = '2010-10-01 00:00:00';
+  const start = new Date(startDate);
+  const end = new Date(endDate);
   const cell = await getCell(cellType, lat, lon);
-  const simulations = await getSimulations(simulationId);
-  const datetimes = await getDatetimes(start, stop);
-  const rains = await getRains(cell.id, start, stop);
+  const simulations = await getSimulations(experimentId);
+  const datetimes = await getDatetimes(start, end);
+  const rains = await getRains(cell.id, start, end);
   const indices = new Map(datetimes.map(({id}, index) => [id, index]));
   const data = new Map(simulations.map(({id}) => [id, new Array(datetimes.length)]));
   for (const {simulationid, datetimeid, sumx} of rains) {
