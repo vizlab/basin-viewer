@@ -19,7 +19,7 @@
         option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda
     hr
     .information(v-if="cells.length > 0")
-  v-map(:zoom=10, :center="[35.4233, 136.7607]", @l-click="onClick")
+  v-map(:zoom=6, :center="[35.4233, 136.7607]", @l-click="onClick")
     v-tilelayer(:url="map")
     .loop(v-for="cell in cells")
       .polygons(v-for="polygon in cell.geometry.coordinates")
