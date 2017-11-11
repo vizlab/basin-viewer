@@ -54,6 +54,7 @@ app.get('/rains', async (req, res) => {
     data.get(simulationid)[indices.get(datetimeid)] = sumx;
   }
   res.json({
+    cell,
     labels: datetimes.map(({datetime}) => datetime),
     ensembles: simulations.map(({id, name}) => {
       return {
