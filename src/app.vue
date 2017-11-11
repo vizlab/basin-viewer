@@ -5,6 +5,9 @@
       dt Experiment
       dd: select(v-model="selectedExperimentId")
         option(v-for="experiment in experiments", :value="experiment.id") {{experiment.nameenglish}}
+      dt Simulations
+      dd: select(v-model="selectedSimulations" multiple)
+        option(v-for="simulation in simulations", :value="simulation.id") {{simulation.name}}
       dt Period
       dd
         datepicker(v-model="start", format="yyyy/MM/dd" :disabled="disabledDates")
@@ -47,6 +50,8 @@ export default {
     selectedCell: null,
     experiments: [],
     selectedExperimentId: null,
+    simulations: [],
+    selectedSimulations: [],
     map: 'http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png',
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
@@ -60,7 +65,7 @@ export default {
       const params = new URLSearchParams();
       params.set('lon', e.latlng.lng);
       params.set('lat', e.latlng.lat);
-      params.set('experimentId', this.selectedExperimentId);
+      params.set('simulationIds', this.selectedSimulations.join(','));
       params.set('startDate', this.start);
       params.set('endDate', this.end);
       fetch(`/rains?${params.toString()}`)
@@ -85,6 +90,15 @@ export default {
         to: start,
         from: end,
       };
+
+      const params = new URLSearchParams();
+      params.set('experimentId', this.selectedExperimentId);
+      fetch(`/simulations?${params.toString()}`)
+        .then(res => res.json())
+        .then(data => {
+          this.simulations = data;
+          this.selectedSimulations = data.map(d => d.id);
+        });
     }
   }
 };

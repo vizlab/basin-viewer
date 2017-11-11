@@ -42,6 +42,17 @@ exports.getExperiments = () => {
     .catch(e => console.error(e.stack));
 };
 
+exports.getSimulation = simulationId => {
+  const query = `
+    SELECT *
+    FROM m_simulation
+    WHERE id = $1
+  `;
+  return pool.query(query, [simulationId])
+    .then(res => res.rows[0])
+    .catch(e => console.error(e.stack));
+};
+
 exports.getSimulations = experimentId => {
   const query = `
     SELECT *
@@ -56,7 +67,7 @@ exports.getSimulations = experimentId => {
 
 exports.getDatetimes = (startDate, endDate) => {
   const query = `
-    SELECT *
+    SELECT datetime AT TIME ZONE 'UTC' AS datetime
     FROM m_datetime
     WHERE $1::TIMESTAMP <= datetime
       AND datetime < $2::TIMESTAMP
@@ -67,16 +78,17 @@ exports.getDatetimes = (startDate, endDate) => {
     .catch(e => console.error(e.stack));
 };
 
-exports.getRains = (cellId, startDate, endDate) => {
+exports.getRains = (simulationId, cellId, startDate, endDate) => {
   const query = `
-  SELECT *
+  SELECT sumx
   FROM sd_rain JOIN m_datetime ON sd_rain.datetimeid = m_datetime.id
   WHERE sd_rain.cellid = $1
     AND $2::TIMESTAMP <= m_datetime.datetime
     AND m_datetime.datetime < $3::TIMESTAMP
-  ORDER BY simulationid, m_datetime.datetime
+    AND simulationid = $4
+  ORDER BY m_datetime.datetime
   `;
-  return pool.query(query, [cellId, startDate, endDate])
+  return pool.query(query, [cellId, startDate, endDate, simulationId])
     .then(res => res.rows)
     .catch(e => console.error(e.stack));
 };

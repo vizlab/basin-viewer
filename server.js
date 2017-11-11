@@ -6,6 +6,7 @@ const {
   getCell,
   getCells,
   getExperiments,
+  getSimulation,
   getSimulations,
   getDatetimes,
   getRains
@@ -21,8 +22,8 @@ app.get('/experiments', async (req, res) => {
 });
 
 app.get('/simulations', async (req, res) => {
-  const simulationId = 2;
-  const simulations = await getSimulations(simulationId);
+  const {experimentId} = req.query;
+  const simulations = await getSimulations(experimentId);
   res.json(simulations);
 });
 
@@ -39,28 +40,28 @@ app.get('/cells', async (req, res) => {
 });
 
 app.get('/rains', async (req, res) => {
-  const {lat, lon, experimentId, startDate, endDate} = req.query;
+  const {lat, lon} = req.query;
   const cellType = 1;
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const simulationIds = req.query.simulationIds.split(',');
+  const start = new Date(req.query.startDate);
+  const end = new Date(req.query.endDate);
+  end.setDate(end.getDate() + 1);
   const cell = await getCell(cellType, lat, lon);
-  const simulations = await getSimulations(experimentId);
   const datetimes = await getDatetimes(start, end);
-  const rains = await getRains(cell.id, start, end);
-  const indices = new Map(datetimes.map(({id}, index) => [id, index]));
-  const data = new Map(simulations.map(({id}) => [id, new Array(datetimes.length)]));
-  for (const {simulationid, datetimeid, sumx} of rains) {
-    data.get(simulationid)[indices.get(datetimeid)] = sumx;
+  // TODO improve performance
+  const ensembles = [];
+  for (const simulationId of simulationIds) {
+    const simulation = await getSimulation(simulationId);
+    const rains = await getRains(simulationId, cell.id, start, end);
+    ensembles.push({
+      name: simulation.name,
+      data: rains.map(({sumx}) => sumx),
+    });
   }
   res.json({
     cell,
-    labels: datetimes.map(({datetime}) => datetime),
-    ensembles: simulations.map(({id, name}) => {
-      return {
-        name,
-        data: data.get(id),
-      };
-    })
+    labels: datetimes.map(({datetime}) => datetime.toISOString().substr(0, 10)),
+    ensembles,
   });
 });
 
