@@ -22,7 +22,7 @@
     .loop(v-for="basin in basins")
       .polygons(v-for="polygon in basin.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(basin), weight: 1}')
-  #chart: viz-basic-line-chart(ref="chart", y-axis-title="rainfall")
+  #chart: viz-basic-histogram(ref="chart", y-axis-title="rainfall")
 </template>
 
 <script>
