@@ -1,23 +1,28 @@
 <template lang="pug">
 #app
   #controller
-    dl
-      dt Experiment
-      dd: select(v-model="selectedExperimentId")
-        option(v-for="experiment in experiments", :value="experiment.id") {{experiment.nameenglish}}
-      dt Simulations
-      dd: select(v-model="selectedSimulations" multiple)
-        option(v-for="simulation in simulations", :value="simulation.id") {{simulation.name}}
-      dt Period
-      dd
-        datepicker(v-model="start", format="yyyy/MM/dd" :disabled="disabledDates")
-        span  ~ 
-        datepicker(v-model="end", format="yyyy/MM/dd" :disabled="disabledDates")
-      dt Map type
-      dd: select(v-model="map")
-        option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") Ordinary
-        option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda
-    hr
+    .field.is-horizontal
+      .field-label.is-normal: label.label Experiment
+      .field-body: .field.is-narrow: .control: .select
+        select(v-model="selectedExperimentId")
+          option(v-for="experiment in experiments", :value="experiment.id") {{experiment.nameenglish}}
+    .field.is-horizontal
+      .field-label.is-normal: label.label Simulations
+      .field-body: .field.is-narrow: .control: .select.is-multiple
+        select(v-model="selectedSimulations" multiple)
+          option(v-for="simulation in simulations", :value="simulation.id") {{simulation.name}}
+    .field.is-horizontal
+      .field-label.is-normal: label.label Period
+      .field-body: .field.is-narrow: .control
+        datepicker(v-model="start", format="yyyy/MM/dd" :disabled="disabledDates", input-class="input")
+        span.tilda  ~
+        datepicker(v-model="end", format="yyyy/MM/dd" :disabled="disabledDates", input-class="input")
+    .field.is-horizontal
+      .field-label.is-normal: label.label Map type
+      .field-body: .field.is-narrow: .control: .select
+        select(v-model="map")
+          option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") Ordinary
+          option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda
     .information(v-if="cells.length > 0")
   v-map(:zoom=6, :center="[35.4233, 136.7607]", @l-click="onClick")
     v-tilelayer(:url="map")
@@ -113,6 +118,7 @@ html, body, #app
   height: 50vh
 #controller
   float: left
+  padding: 20px
   dt
     float: left
     margin: 0 10px
@@ -120,6 +126,8 @@ html, body, #app
     display: inline-block
   .information
     padding: 0 10px
+  .tilda
+    vertical-align: -10px
 .vue2leaflet-map.leaflet-container
   float: right
   cursor: crosshair
