@@ -3,6 +3,7 @@ import Vue2Leaflet from 'vue2-leaflet';
 import App from './app.vue';
 import './charts/basic-line-chart';
 import './charts/basic-histogram';
+import './charts/basic-stacked-area-chart';
 
 Vue.component('v-map', Vue2Leaflet.Map);
 Vue.component('v-tilelayer', Vue2Leaflet.TileLayer);

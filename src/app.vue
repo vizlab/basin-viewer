@@ -28,6 +28,7 @@
   #chart
     viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall", v-if="selectedGraph == 'basic-line-chart'")
     viz-basic-histogram(ref="histogram", y-axis-title="rainfall", v-if="selectedGraph == 'basic-histogram'")
+    viz-basic-stacked-area-chart(ref="stackedAreaChart", y-axis-title="rainfall", v-if="selectedGraph == 'basic-stacked-area-chart'")
 </template>
 
 <script>
@@ -41,10 +42,11 @@ export default {
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
     includeUpstreamBasins: true,
-    selectedGraph: 'basic-line-chart',
+    selectedGraph: 'basic-stacked-area-chart',
     graphOptions: [
-      { text: 'line-chart', value: 'basic-line-chart'},
-      { text: 'histogram', value: 'basic-histogram'}
+      { text: 'line chart', value: 'basic-line-chart'},
+      { text: 'histogram', value: 'basic-histogram'},
+      { text: 'area chart', value: 'basic-stacked-area-chart' }
     ]
   }),
   methods: {
@@ -63,6 +65,8 @@ export default {
           case ('basic-histogram'):
             this.$refs.histogram.load(data, { bins: 20 });
             break;
+          case ('basic-stacked-area-chart'):
+            this.$refs.stackedAreaChart.load(data);
         }
       });
     },
