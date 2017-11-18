@@ -25,9 +25,9 @@
     .loop(v-for="basin in basins")
       .polygons(v-for="polygon in basin.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(basin), weight: 1}')
-    <!--#chart: viz-basic-histogram(ref="chart", y-axis-title="rainfall")-->
-  viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall", v-show="selectedGraph == 'basic-line-chart'")
-  viz-basic-histogram(ref="histogram", y-axis-title="rainfall", v-show="selectedGraph == 'basic-histogram'")
+  #chart
+    viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall", v-if="selectedGraph == 'basic-line-chart'")
+    viz-basic-histogram(ref="histogram", y-axis-title="rainfall", v-if="selectedGraph == 'basic-histogram'")
 </template>
 
 <script>
@@ -56,8 +56,14 @@ export default {
       fetch('/dist/rains.json')
       .then(res => res.json())
       .then(data => {
-        this.$refs.lineChart.load(data);
-        this.$refs.histogram.load(data);
+        switch (this.selectedGraph) {
+          case ('basic-line-chart'):
+            this.$refs.lineChart.load(data);
+            break;
+          case ('basic-histogram'):
+            this.$refs.histogram.load(data, { bins: 20 });
+            break;
+        }
       });
     },
     swapLatLng(polygon) {

@@ -9,7 +9,7 @@ const template = html`
   height: 100%;
 }
 </style>
-<div class="content" />
+<div class="histogram-content" />
 `;
 
 class BasicHistogram extends window.HTMLElement {
@@ -23,63 +23,19 @@ class BasicHistogram extends window.HTMLElement {
     super();
     this.options = {
       chart: {
-        type: 'column'
+        type: 'column',
+        zoomType: 'x'
       },
       title: {
         text: ''
       },
       series: [
-        {
-          name: 'Sample Distribution 1',
-          data: [
-          ],
-          borderWidth: .5,
-          borderColor: '#666',
-          pointPadding: .015,
-          groupPadding: 0,
-          color: '#1f77b4'
-        },
-        {
-          name: 'Sample Distribution 2',
-          data: [
-          ],
-          borderWidth: .5,
-          borderColor: '#666',
-          pointPadding: .015,
-          groupPadding: 0,
-          color: '#ff7f0e'
-        },
-        {
-          name: 'Sample Distribution 3',
-          data: [
-          ],
-          borderWidth: .5,
-          borderColor: '#666',
-          pointPadding: .015,
-          groupPadding: 0,
-          color: '#2ca02c'
-        },
-        {
-          name: 'Sample Distribution 4',
-          data: [
-          ],
-          borderWidth: .5,
-          borderColor: '#666',
-          pointPadding: .015,
-          groupPadding: 0,
-          color: '#d62728'
-        },
-        {
-          name: 'Sample Distribution 5',
-          data: [
-          ],
-          borderWidth: .5,
-          borderColor: '#666',
-          pointPadding: .015,
-          groupPadding: 0,
-          color: '#9467bd'
+      ],
+      plotOptions: {
+        column: {
+          stacking: 'normal'
         }
-      ]
+      }
     };
     const shadowRoot = this.attachShadow({mode: 'open'});
     render(template, shadowRoot);
@@ -112,8 +68,8 @@ class BasicHistogram extends window.HTMLElement {
   adoptedCallback () {
   }
 
-  load (data) {
-    const bins = 20;
+  load (data, options) {
+    const bins = options.bins;
     const max = Math.max.apply(null, data.ensembles.map(ensemble => {
       return Math.max.apply(null, ensemble.data);
     }));
@@ -128,8 +84,12 @@ class BasicHistogram extends window.HTMLElement {
         return [h * idx, ensemble.data.filter(d => (d > range[0]) && (d < range[1])).length ];
       });
     });
+
     histograms.forEach((histogram, idx) => {
-      this.options.series[idx].data = histogram;
+      this.options.series.push({
+        name: data.ensembles[idx].name,
+        data: histogram
+      });
     });
 
     this.render();
@@ -141,8 +101,8 @@ class BasicHistogram extends window.HTMLElement {
       this.chart.destroy();
     }
     if (this.options) {
-      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.content'), this.options);
     }
+      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.histogram-content'), this.options);
   }
 
   get yAxisTitle () {

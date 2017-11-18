@@ -9,7 +9,7 @@ const template = html`
   height: 100%;
 }
 </style>
-<div class="content" />
+<div class="line-chart-content" />
 `;
 
 class BasicLineChart extends window.HTMLElement {
@@ -82,7 +82,7 @@ class BasicLineChart extends window.HTMLElement {
       this.chart.destroy();
     }
     if (this.options) {
-      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.content'), this.options);
+      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.line-chart-content'), this.options);
     }
   }
 
