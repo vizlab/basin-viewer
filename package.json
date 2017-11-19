@@ -12,6 +12,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
     "lint": "eslint src/*.{js,vue}",
     "start": "nodemon server.js",
+    "dev": "nodemon server-mock.js",
     "watch": "webpack -w"
   },
   "dependencies": {
