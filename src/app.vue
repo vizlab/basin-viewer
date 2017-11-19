@@ -38,6 +38,7 @@
     viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall", v-if="selectedGraph == 'basic-line-chart'")
     viz-basic-histogram(ref="histogram", y-axis-title="rainfall", v-if="selectedGraph == 'basic-histogram'")
     viz-basic-stacked-area-chart(ref="stackedAreaChart", y-axis-title="rainfall", v-if="selectedGraph == 'basic-stacked-area-chart'")
+    viz-basic-box-plot(ref="boxPlot", y-axis-title="rainfall", v-if="selectedGraph == 'basic-box-plot'")
 </template>
 
 <script>
@@ -69,11 +70,12 @@ export default {
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
     disabledDates: {},
-    selectedGraph: 'basic-stacked-area-chart',
+    selectedGraph: 'basic-box-plot',
     graphOptions: [
       { text: 'line chart', value: 'basic-line-chart'},
       { text: 'histogram', value: 'basic-histogram'},
-      { text: 'area chart', value: 'basic-stacked-area-chart' }
+      { text: 'area chart', value: 'basic-stacked-area-chart' },
+      { text: 'box plot', value: 'basic-box-plot' }
     ]
   }),
   methods: {
@@ -100,6 +102,10 @@ export default {
               break;
             case ('basic-stacked-area-chart'):
               this.$refs.stackedAreaChart.load(data);
+              break;
+            case ('basic-box-plot'):
+              this.$refs.boxPlot.load(data);
+              break;
           }
         });
     },
