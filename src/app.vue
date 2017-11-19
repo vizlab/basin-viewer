@@ -13,6 +13,9 @@
       dd: select(v-model="map")
         option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") Ordinary
         option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda
+      dt Graph type
+      dd: select(v-model="selectedGraph")
+        option(v-for="option in graphOptions" v-bind:value="option.value") {{ option.text }}
     hr
     .information(v-if="basins.length > 0")
       p Selected river: {{ basins[0].properties.W07_005 }}
@@ -22,7 +25,9 @@
     .loop(v-for="basin in basins")
       .polygons(v-for="polygon in basin.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(basin), weight: 1}')
-  #chart: viz-basic-line-chart(ref="chart", y-axis-title="rainfall")
+  #chart
+    viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall", v-if="selectedGraph == 'basic-line-chart'")
+    viz-basic-histogram(ref="histogram", y-axis-title="rainfall", v-if="selectedGraph == 'basic-histogram'")
 </template>
 
 <script>
@@ -35,7 +40,12 @@ export default {
     map: 'http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png',
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
-    includeUpstreamBasins: true
+    includeUpstreamBasins: true,
+    selectedGraph: 'basic-line-chart',
+    graphOptions: [
+      { text: 'line-chart', value: 'basic-line-chart'},
+      { text: 'histogram', value: 'basic-histogram'}
+    ]
   }),
   methods: {
     polygonColor(basin) {
@@ -46,7 +56,14 @@ export default {
       fetch('/dist/rains.json')
       .then(res => res.json())
       .then(data => {
-        this.$refs.chart.load(data);
+        switch (this.selectedGraph) {
+          case ('basic-line-chart'):
+            this.$refs.lineChart.load(data);
+            break;
+          case ('basic-histogram'):
+            this.$refs.histogram.load(data, { bins: 20 });
+            break;
+        }
       });
     },
     swapLatLng(polygon) {

@@ -9,10 +9,10 @@ const template = html`
   height: 100%;
 }
 </style>
-<div class="line-chart-content" />
+<div class="histogram-content" />
 `;
 
-class BasicLineChart extends window.HTMLElement {
+class BasicHistogram extends window.HTMLElement {
   static get observedAttributes () {
     return [
       'y-axis-title'
@@ -21,25 +21,22 @@ class BasicLineChart extends window.HTMLElement {
 
   constructor () {
     super();
-
     this.options = {
-      title: {
-        text: null
-      },
       chart: {
+        type: 'column',
+        zoomType: 'x'
       },
-      xAxis: {
-        categories: [],
-        tickInterval: 48
+      title: {
+        text: ''
       },
-      yAxis: {
-        title: {
-          text: this.yAxisTitle
+      series: [
+      ],
+      plotOptions: {
+        column: {
+          stacking: 'normal'
         }
-      },
-      series: []
+      }
     };
-
     const shadowRoot = this.attachShadow({mode: 'open'});
     render(template, shadowRoot);
   }
@@ -62,7 +59,8 @@ class BasicLineChart extends window.HTMLElement {
   attributeChangedCallback (attrName, oldVal, newVal) {
     switch (attrName) {
       case 'y-axis-title':
-        this.options.yAxis.title.text = this.yAxisTitle;
+        console.log(this.yAxisTitle);
+        // this.options.yAxis[0].title.text = this.yAxisTitle;
         break;
     }
   }
@@ -70,9 +68,30 @@ class BasicLineChart extends window.HTMLElement {
   adoptedCallback () {
   }
 
-  load (data) {
-    this.options.xAxis.categories = data.labels;
-    this.options.series = data.ensembles;
+  load (data, options) {
+    const bins = options.bins;
+    const max = Math.max.apply(null, data.ensembles.map(ensemble => {
+      return Math.max.apply(null, ensemble.data);
+    }));
+    const min = Math.min.apply(null, data.ensembles.map(ensemble => {
+      return Math.min.apply(null, ensemble.data);
+    }));
+
+    const h = (max - min) / bins;
+    const histograms = data.ensembles.map(ensemble => {
+      return [...Array(bins).keys()].map(idx => {
+        const range = [h * idx, h * (idx + 1)];
+        return [h * idx, ensemble.data.filter(d => (d > range[0]) && (d < range[1])).length ];
+      });
+    });
+
+    histograms.forEach((histogram, idx) => {
+      this.options.series.push({
+        name: data.ensembles[idx].name,
+        data: histogram
+      });
+    });
+
     this.render();
   }
 
@@ -82,8 +101,8 @@ class BasicLineChart extends window.HTMLElement {
       this.chart.destroy();
     }
     if (this.options) {
-      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.line-chart-content'), this.options);
     }
+      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.histogram-content'), this.options);
   }
 
   get yAxisTitle () {
@@ -98,4 +117,4 @@ class BasicLineChart extends window.HTMLElement {
   }
 }
 
-window.customElements.define('viz-basic-line-chart', BasicLineChart);
+window.customElements.define('viz-basic-histogram', BasicHistogram);
