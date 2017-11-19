@@ -10,22 +10,13 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-  props: ['graphType'],
-  created() {
-    this.$on('bindData', d => {
-      this.bindData(d);
-    });
-  },
+  props: ['graphType', 'data'],
   watch: {
-    graphType(newVal, oldVal) {
-      this.graphType = newVal;
+    data() {
+      this.render();
     }
   },
   methods: {
-    bindData(d) {
-      this.data = d;
-      this.render();
-    },
     render() {
       if(!this.data || !this.graphType) return;
       switch (this.graphType) {

@@ -34,7 +34,7 @@
     .loop(v-for="cell in cells")
       .polygons(v-for="polygon in cell.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: 1}')
-  charts(:graphType="selectedGraph", ref="charts")
+  charts(:graphType="selectedGraph", :data="data")
 </template>
 
 <script>
@@ -61,6 +61,7 @@ export default {
   },
   data: () => ({
     cells: [],
+    data: null,
     selectedCell: null,
     experiments: [],
     selectedExperimentId: null,
@@ -93,7 +94,7 @@ export default {
         .then(res => res.json())
         .then(data => {
           this.selectedCell = data.cell;
-          this.$refs.charts.$emit('bindData', data);
+          this.data = data;
         });
     },
     swapLatLng(polygon) {
