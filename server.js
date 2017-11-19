@@ -1,47 +1,68 @@
-/*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
-
 const express = require('express');
 const app = express();
 const path = require('path');
-const MongoClient = require('mongodb').MongoClient;
-const _ = require('lodash');
+const wkx = require('wkx');
+const {
+  getCell,
+  getCells,
+  getExperiments,
+  getSimulation,
+  getSimulations,
+  getDatetimes,
+  getRains
+} = require('./sicat-db');
 
 app.use('/dist', express.static('dist'));
 
-const connections = require('./data/connections.json');
-const rainfall = require('./data/rainfall.json');
+app.get('/', (req, res) => res.sendFile(path.join(`${__dirname}/index.html`)));
 
-const getAllUpstreamCodes = river_code => {
-  let codeList = [river_code];
-  while(true) {
-    const currentLength = codeList.length;
-    codeList = _.uniq(_.flatten(codeList.concat(codeList.map(code => {
-      return connections.filter(conn => conn[1].W07_003 === river_code).map(con => con[0].W07_003);
-      // return connections.filter(conn => conn[1].W07_003 === code).map(con => con[0].W07_003);
-    }))));
-    if(currentLength === codeList.length) break;
-  }
-  return codeList;
-};
-
-MongoClient.connect('mongodb://localhost:27017/sicat', (err, db) => {
-  if (err) throw err;
-
-  app.get('/', (req, res) => res.sendFile(path.join(`${__dirname}/index.html`)));
-
-  app.get('/basin', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    const query = {geometry: {$geoIntersects: {$geometry: {
-      type: 'Point', coordinates: [parseFloat(req.query.lon), parseFloat(req.query.lat)]
-    }}}};
-    db.collection('basin').find(query).toArray((err, result) => {
-      if(result.length === 0 || result[0].properties.W07_003.endsWith('0000')) return res.json([]);
-      const cons = getAllUpstreamCodes(result[0].properties.W07_003);
-      db.collection('basin').find({'properties.W07_003': {'$in': cons}}).toArray((err, result2) => {
-        return res.json({basins: result.concat(result2), rainfall});
-      });
-    });
-  });
-
-  app.listen(process.env.PORT || 3000, () => console.log('started.'));
+app.get('/experiments', async (req, res) => {
+  const experiments = await getExperiments();
+  res.json(experiments);
 });
+
+app.get('/simulations', async (req, res) => {
+  const {experimentId} = req.query;
+  const simulations = await getSimulations(experimentId);
+  res.json(simulations);
+});
+
+app.get('/cells', async (req, res) => {
+  const cellType = 1;
+  const cells = await getCells(cellType);
+  res.json(cells.map(({id, geog}) => {
+    const buffer = new Buffer(geog, 'hex');
+    return {
+      id,
+      geometry: wkx.Geometry.parse(buffer).toGeoJSON()
+    };
+  }));
+});
+
+app.get('/rains', async (req, res) => {
+  const {lat, lon} = req.query;
+  const cellType = 1;
+  const simulationIds = req.query.simulationIds.split(',');
+  const start = new Date(req.query.startDate);
+  const end = new Date(req.query.endDate);
+  end.setDate(end.getDate() + 1);
+  const cell = await getCell(cellType, lat, lon);
+  const datetimes = await getDatetimes(start, end);
+  // TODO improve performance
+  const ensembles = [];
+  for (const simulationId of simulationIds) {
+    const simulation = await getSimulation(simulationId);
+    const rains = await getRains(simulationId, cell.id, start, end);
+    ensembles.push({
+      name: simulation.name,
+      data: rains.map(({sumx}) => sumx),
+    });
+  }
+  res.json({
+    cell,
+    labels: datetimes.map(({datetime}) => datetime.toISOString().substr(0, 10)),
+    ensembles,
+  });
+});
+
+app.listen(process.env.PORT || 3000, () => console.log('started.'));
