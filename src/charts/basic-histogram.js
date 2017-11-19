@@ -59,7 +59,6 @@ class BasicHistogram extends window.HTMLElement {
   attributeChangedCallback (attrName, oldVal, newVal) {
     switch (attrName) {
       case 'y-axis-title':
-        console.log(this.yAxisTitle);
         // this.options.yAxis[0].title.text = this.yAxisTitle;
         break;
     }

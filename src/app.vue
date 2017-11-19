@@ -34,18 +34,18 @@
     .loop(v-for="cell in cells")
       .polygons(v-for="polygon in cell.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: 1}')
-  #chart
-    viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall", v-if="selectedGraph == 'basic-line-chart'")
-    viz-basic-histogram(ref="histogram", y-axis-title="rainfall", v-if="selectedGraph == 'basic-histogram'")
-    viz-basic-stacked-area-chart(ref="stackedAreaChart", y-axis-title="rainfall", v-if="selectedGraph == 'basic-stacked-area-chart'")
-    viz-basic-box-plot(ref="boxPlot", y-axis-title="rainfall", v-if="selectedGraph == 'basic-box-plot'")
+  charts(:graphType="selectedGraph", ref="charts")
 </template>
 
 <script>
 import Datepicker from 'vuejs-datepicker';
+import Charts from './charts.vue';
 
 export default {
-  components: {Datepicker},
+  components: {
+    datepicker: Datepicker,
+    charts: Charts
+  },
   mounted () {
     fetch('/cells')
       .then(res => res.json())
@@ -70,10 +70,10 @@ export default {
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
     disabledDates: {},
-    selectedGraph: 'basic-box-plot',
+    selectedGraph: 'basic-line-chart',
     graphOptions: [
-      { text: 'line chart', value: 'basic-line-chart'},
-      { text: 'histogram', value: 'basic-histogram'},
+      { text: 'line chart', value: 'basic-line-chart' },
+      { text: 'histogram', value: 'basic-histogram' },
       { text: 'area chart', value: 'basic-stacked-area-chart' },
       { text: 'box plot', value: 'basic-box-plot' }
     ]
@@ -93,20 +93,7 @@ export default {
         .then(res => res.json())
         .then(data => {
           this.selectedCell = data.cell;
-          switch (this.selectedGraph) {
-            case ('basic-line-chart'):
-              this.$refs.lineChart.load(data);
-              break;
-            case ('basic-histogram'):
-              this.$refs.histogram.load(data, { bins: 20 });
-              break;
-            case ('basic-stacked-area-chart'):
-              this.$refs.stackedAreaChart.load(data);
-              break;
-            case ('basic-box-plot'):
-              this.$refs.boxPlot.load(data);
-              break;
-          }
+          this.$refs.charts.$emit('bindData', data);
         });
     },
     swapLatLng(polygon) {
@@ -160,11 +147,6 @@ html, body, #app
 .vue2leaflet-map.leaflet-container
   float: right
   cursor: crosshair
-#chart
-  position: fixed
-  top: 50%
-  width: 100%
-  height: 50vh
 #app
   font-family: 'Avenir', Helvetica, Arial, sans-serif
 </style>
