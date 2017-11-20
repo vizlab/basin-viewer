@@ -9,10 +9,10 @@ const template = html`
   height: 100%;
 }
 </style>
-<div class="histogram-content" />
+<div class="box-plot-content" />
 `;
 
-class BasicHistogram extends window.HTMLElement {
+class BasicBoxPlot extends window.HTMLElement {
   static get observedAttributes () {
     return [
       'y-axis-title'
@@ -21,22 +21,27 @@ class BasicHistogram extends window.HTMLElement {
 
   constructor () {
     super();
+
     this.options = {
+      title: {
+        text: null
+      },
       chart: {
-        type: 'column',
+        type: 'boxplot',
         zoomType: 'x'
       },
-      title: {
-        text: ''
+      xAxis: {
+        categories: [],
+        tickInterval: 48
       },
-      series: [
-      ],
-      plotOptions: {
-        column: {
-          stacking: 'normal'
+      yAxis: {
+        title: {
+          text: this.yAxisTitle
         }
-      }
+      },
+      series: []
     };
+
     const shadowRoot = this.attachShadow({mode: 'open'});
     render(template, shadowRoot);
   }
@@ -59,7 +64,7 @@ class BasicHistogram extends window.HTMLElement {
   attributeChangedCallback (attrName, oldVal, newVal) {
     switch (attrName) {
       case 'y-axis-title':
-        // this.options.yAxis[0].title.text = this.yAxisTitle;
+        this.options.yAxis.title.text = this.yAxisTitle;
         break;
     }
   }
@@ -67,30 +72,26 @@ class BasicHistogram extends window.HTMLElement {
   adoptedCallback () {
   }
 
-  load (data, options) {
-    const bins = options.bins;
-    const max = Math.max.apply(null, data.ensembles.map(ensemble => {
-      return Math.max.apply(null, ensemble.data);
-    }));
-    const min = Math.min.apply(null, data.ensembles.map(ensemble => {
-      return Math.min.apply(null, ensemble.data);
-    }));
-
-    const h = (max - min) / bins;
-    const histograms = data.ensembles.map(ensemble => {
-      return [...Array(bins).keys()].map(idx => {
-        const range = [h * idx, h * (idx + 1)];
-        return [h * idx, ensemble.data.filter(d => (d > range[0]) && (d < range[1])).length ];
+  load (data) {
+    this.options.xAxis.categories = data.ensembles.map(d => d.name);
+    const scatters = [];
+    data.ensembles.forEach((d, idx) => {
+      d.data.forEach(_d => {
+        scatters.push([idx, _d]);
       });
     });
-
-    histograms.forEach((histogram, idx) => {
-      this.options.series.push({
-        name: data.ensembles[idx].name,
-        data: histogram
-      });
-    });
-
+    this.options.series = [
+      {
+        name: 'outlier',
+        type: 'scatter',
+        data: scatters,
+        marker: {
+          fillColor: 'white',
+          lineWidth: 1,
+          lineColor: HighCharts.getOptions().colors[0]
+        },
+      }
+    ];
     this.render();
   }
 
@@ -100,7 +101,7 @@ class BasicHistogram extends window.HTMLElement {
       this.chart.destroy();
     }
     if (this.options) {
-      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.histogram-content'), this.options);
+      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.box-plot-content'), this.options);
     }
   }
 
@@ -116,4 +117,4 @@ class BasicHistogram extends window.HTMLElement {
   }
 }
 
-window.customElements.define('viz-basic-histogram', BasicHistogram);
+window.customElements.define('viz-basic-box-plot', BasicBoxPlot);
