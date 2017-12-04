@@ -2,7 +2,7 @@ const { Pool } = require('pg');
 
 const pool = new Pool({
   user: 'db_user',
-  host: 'localhost',
+  host: process.env.DB_ENDPOINT || 'localhost',
   database: 'd4pdf_rcm',
   password: 'db_user!si-cat',
   port: 5432,
