@@ -1,4 +1,5 @@
 const express = require('express');
+const basicAuth = require('basic-auth-connect');
 const app = express();
 const path = require('path');
 const wkx = require('wkx');
@@ -11,6 +12,10 @@ const {
   getDatetimes,
   getRains
 } = require('./sicat-db');
+
+app.all('/', basicAuth((user, pass) => {
+  return process.env.USER === user && process.env.PASS === pass;
+}));
 
 app.use('/dist', express.static('dist'));
 

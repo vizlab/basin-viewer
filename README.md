@@ -7,22 +7,18 @@ SI-CAT project
 ### Preparation
 
 ```shell-session
-$ gem install mongo
 $ npm install
 ```
 
-### MongoDB
-
-```shell-session
-$ docker run -p 27017:27017 -v `pwd`/mongo:/data/db mongo
+### ENVs
 ```
-
-### Data Initialization
-
-Put {connections,japan-basin,rainfall}.json in ./data and run the following command.
-
-```shell-session
-$ ruby insert.rb
+export PGHOST=""
+export PGUSER=""
+export PGDATABASE=""
+export PGPASSWORD=""
+export PGPORT=5432
+export USER="" # Basic auth
+export PASS="" # Basic auth
 ```
 
 ### Watch Client Code

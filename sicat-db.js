@@ -1,11 +1,11 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  user: 'db_user',
-  host: process.env.DB_ENDPOINT || 'localhost',
-  database: 'd4pdf_rcm',
-  password: 'db_user!si-cat',
-  port: 5432,
+  user: process.env.PGUSER,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+  port: process.env.PGPORT
 });
 
 exports.getCell = (cellType, lat, lon) => {

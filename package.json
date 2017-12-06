@@ -16,6 +16,7 @@
     "watch": "webpack -w"
   },
   "dependencies": {
+    "basic-auth-connect": "^1.0.0",
     "express": "^4.15.4",
     "highcharts": "^5.0.14",
     "lit-html": "^0.7.1",
