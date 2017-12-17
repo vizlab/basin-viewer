@@ -1,5 +1,7 @@
 import {html, render} from 'lit-html';
 import HighCharts from 'highcharts';
+import HighChartsMore from '../../node_modules/highcharts/highcharts-more';
+HighChartsMore(HighCharts);
 
 const template = html`
 <style>
@@ -64,7 +66,7 @@ class BasicBoxPlot extends window.HTMLElement {
   attributeChangedCallback (attrName, oldVal, newVal) {
     switch (attrName) {
       case 'y-axis-title':
-        this.options.yAxis.title.text = this.yAxisTitle;
+        // this.options.yAxis.title.text = this.yAxisTitle;
         break;
     }
   }
@@ -74,22 +76,24 @@ class BasicBoxPlot extends window.HTMLElement {
 
   load (data) {
     this.options.xAxis.categories = data.ensembles.map(d => d.name);
-    const scatters = [];
+    const boxes = [];
     data.ensembles.forEach((d, idx) => {
+      let min = 0;
+      let max = 0;
+      const m = median(d.data);
+      const lq = median(d.data.filter(_d => _d <= m));
+      const uq = median(d.data.filter(_d => _d >= m));
+
       d.data.forEach(_d => {
-        scatters.push([idx, _d]);
+        min = Math.min(min, _d);
+        max = Math.max(max, _d);
       });
+      boxes.push([min, lq, m, uq, max]);
     });
+    console.log(boxes);
     this.options.series = [
       {
-        name: 'outlier',
-        type: 'scatter',
-        data: scatters,
-        marker: {
-          fillColor: 'white',
-          lineWidth: 1,
-          lineColor: HighCharts.getOptions().colors[0]
-        },
+        data: boxes,
       }
     ];
     this.render();
@@ -118,3 +122,14 @@ class BasicBoxPlot extends window.HTMLElement {
 }
 
 window.customElements.define('viz-basic-box-plot', BasicBoxPlot);
+
+const median = (arr, fn) => {
+  const half = (arr.length/2)|0;
+  const temp = arr.sort(fn);
+
+  if (temp.length%2) {
+    return temp[half];
+  }
+
+  return (temp[half-1] + temp[half])/2;
+};
