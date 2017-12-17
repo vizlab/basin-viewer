@@ -1,5 +1,7 @@
 import {html, render} from 'lit-html';
 import HighCharts from 'highcharts';
+import HighChartsMore from '../../node_modules/highcharts/highcharts-more';
+HighChartsMore(HighCharts);
 
 const template = html`
 <style>
@@ -32,12 +34,12 @@ class BasicBoxPlot extends window.HTMLElement {
       },
       xAxis: {
         categories: [],
-        tickInterval: 48
       },
       yAxis: {
         title: {
           text: this.yAxisTitle
-        }
+        },
+        min: 0,
       },
       series: []
     };
@@ -64,7 +66,7 @@ class BasicBoxPlot extends window.HTMLElement {
   attributeChangedCallback (attrName, oldVal, newVal) {
     switch (attrName) {
       case 'y-axis-title':
-        this.options.yAxis.title.text = this.yAxisTitle;
+        // this.options.yAxis.title.text = this.yAxisTitle;
         break;
     }
   }
@@ -73,25 +75,38 @@ class BasicBoxPlot extends window.HTMLElement {
   }
 
   load (data) {
-    this.options.xAxis.categories = data.ensembles.map(d => d.name);
-    const scatters = [];
-    data.ensembles.forEach((d, idx) => {
-      d.data.forEach(_d => {
-        scatters.push([idx, _d]);
+    const boxes = [];
+
+    const timestampData = [];
+    data.ensembles.forEach(d => {
+      d.data.forEach((_d, idx) => {
+        if(!timestampData[idx]) {
+          timestampData[idx] = [];
+        }
+        timestampData[idx].push(_d);
       });
+    });
+
+    timestampData.forEach((d, idx) => {
+      let min = 0;
+      let max = 0;
+      const m = median(d);
+      const lq = median(d.filter(_d => _d <= m));
+      const uq = median(d.filter(_d => _d >= m));
+
+      d.forEach(_d => {
+        min = Math.min(min, _d);
+        max = Math.max(max, _d);
+      });
+      boxes.push([min, lq, m, uq, max]);
     });
     this.options.series = [
       {
-        name: 'outlier',
-        type: 'scatter',
-        data: scatters,
-        marker: {
-          fillColor: 'white',
-          lineWidth: 1,
-          lineColor: HighCharts.getOptions().colors[0]
-        },
+        showInLegend: false,
+        data: boxes,
       }
     ];
+    this.options.xAxis.categories = data.labels;
     this.render();
   }
 
@@ -118,3 +133,14 @@ class BasicBoxPlot extends window.HTMLElement {
 }
 
 window.customElements.define('viz-basic-box-plot', BasicBoxPlot);
+
+const median = (arr, fn) => {
+  const half = (arr.length/2)|0;
+  const temp = arr.sort(fn);
+
+  if (temp.length%2) {
+    return temp[half];
+  }
+
+  return (temp[half-1] + temp[half])/2;
+};
