@@ -35,16 +35,19 @@
       .polygons(v-for="polygon in cell.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: 1}')
   charts(:graphType="selectedGraph", :data="data")
+  modal(v-if="showModal", :events="events", @close="showModal = false", @fetchRainByEvent="fetchRainByEvent")
 </template>
 
 <script>
 import Datepicker from 'vuejs-datepicker';
 import Charts from './charts.vue';
+import Modal from './modal.vue';
 
 export default {
   components: {
     datepicker: Datepicker,
-    charts: Charts
+    charts: Charts,
+    modal: Modal
   },
   mounted () {
     fetch('/cells')
@@ -77,16 +80,42 @@ export default {
       { text: 'histogram', value: 'basic-histogram' },
       { text: 'area chart', value: 'basic-stacked-area-chart' },
       { text: 'box plot', value: 'basic-box-plot' }
-    ]
+    ],
+    events: [],
+    showModal: false
   }),
   methods: {
     polygonColor(cell) {
       return this.selectedCell && cell.id === this.selectedCell.id ? '#ff7800' : '#333333';
     },
     onClick(e) {
+      this.fetchRainsByCoord(e.latlng.lng, e.latlng.lat);
+    },
+    fetchEvents() {
+      fetch('/events')
+        .then(res => res.json())
+        .then(data => {
+          this.events = data.events;
+          this.showModal = true;
+        });
+    },
+    fetchRainByEvent(event) {
       const params = new URLSearchParams();
-      params.set('lon', e.latlng.lng);
-      params.set('lat', e.latlng.lat);
+      params.set('simulationId', this.simulations.find(s => s.name === event.simulation_name).id);
+      params.set('cellId', this.selectedCell.id);
+      params.set('startDate', new Date(Date.parse(this.start) - (6 * 24 * 60 * 60 * 1000)));
+      params.set('endDate', new Date(Date.parse(this.start) + (8 * 24 * 60 * 60 * 1000)));
+      fetch(`/rain?${params.toString()}`)
+        .then(res => res.json())
+        .then(data => {
+          this.data = data;
+          this.showModal = false;
+        });
+    },
+    fetchRainsByCoord(lng, lat) {
+      const params = new URLSearchParams();
+      params.set('lon', lng);
+      params.set('lat', lat);
       params.set('simulationIds', this.selectedSimulations.join(','));
       params.set('startDate', this.start);
       params.set('endDate', this.end);
@@ -95,6 +124,7 @@ export default {
         .then(data => {
           this.selectedCell = data.cell;
           this.data = data;
+          this.fetchEvents();
         });
     },
     swapLatLng(polygon) {

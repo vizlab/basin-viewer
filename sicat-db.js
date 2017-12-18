@@ -92,3 +92,10 @@ exports.getRains = (simulationId, cellId, startDate, endDate) => {
     .then(res => res.rows)
     .catch(e => console.error(e.stack));
 };
+
+exports.getEvents = (experimentName, areacode, startDate, endDate) => {
+  const query = 'SELECT * FROM xq_ex1($1, $2, $3, $4)';
+  return pool.query(query, [experimentName, areacode, startDate, endDate])
+    .then(res => console.log(res.rows))
+    .catch(e => console.error(e.stack));
+}
