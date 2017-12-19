@@ -1,5 +1,5 @@
 <template lang="pug">
-#app
+#app(v-bind:class="{waiting: waiting}")
   #controller
     .field.is-horizontal
       .field-label.is-normal: label.label Experiment
@@ -18,24 +18,32 @@
         span.tilda  ~
         datepicker(v-model="end", format="yyyy/MM/dd" :disabled="disabledDates", input-class="input")
     .field.is-horizontal
-      .field-label.is-normal: label.label Map type
+      .field-label.is-normal
+      .field-body: .field.is-narrow: .control: button.button(v-on:click="showEventList") Show Event List
+    .field.is-horizontal
+      .field-label.is-normal: label.label Range
+      .field-body: .field.is-narrow: .control: .select
+        select(v-model="selectedRange")
+          option(v-for="option in rangeOptions" v-bind:value="option.value") {{ option.text }}
+    .field.is-horizontal
+      .field-label.is-normal: label.label Map Type
       .field-body: .field.is-narrow: .control: .select
         select(v-model="map")
           option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") Ordinary
           option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda
     .field.is-horizontal
-      .field-label.is-normal: label.label Chart type
+      .field-label.is-normal: label.label Chart Type
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedGraph")
           option(v-for="option in graphOptions" v-bind:value="option.value") {{ option.text }}
     .information(v-if="cells.length > 0")
-  v-map(:zoom=6, :center="[35.4233, 136.7607]", @l-click="onClick")
+  v-map(:zoom=6, :center="[35.4233, 136.7607]", @l-click="handleClickMap")
     v-tilelayer(:url="map")
     .loop(v-for="cell in cells")
       .polygons(v-for="polygon in cell.geometry.coordinates")
         v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: 1}')
   charts(:graphType="selectedGraph", :data="data")
-  modal(v-if="showModal", :events="events", @close="showModal = false", @fetchRainByEvent="fetchRainByEvent")
+  modal(v-if="showModal", :events="events", @close="showModal = false", @handleSelectEvent="selectEvent")
 </template>
 
 <script>
@@ -64,7 +72,11 @@ export default {
   },
   data: () => ({
     cells: [],
-    data: null,
+    data: {
+      cell: null,
+      ensembles: [],
+      labels: []
+    },
     selectedCell: null,
     experiments: [],
     selectedExperimentId: null,
@@ -74,24 +86,32 @@ export default {
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
     disabledDates: {},
-    selectedGraph: 'basic-line-chart',
+    selectedGraph: 'basic-box-plot',
     graphOptions: [
-      { text: 'line chart', value: 'basic-line-chart' },
-      { text: 'histogram', value: 'basic-histogram' },
-      { text: 'area chart', value: 'basic-stacked-area-chart' },
-      { text: 'box plot', value: 'basic-box-plot' }
+      { text: 'Line Chart', value: 'basic-line-chart' },
+      { text: 'Histogram', value: 'basic-histogram' },
+      { text: 'Area Chart', value: 'basic-stacked-area-chart' },
+      { text: 'Box Plot', value: 'basic-box-plot' }
+    ],
+    selectedRange: 'hour',
+    rangeOptions: [
+      { text: 'Year', value: 'year' },
+      { text: 'Month', value: 'month' },
+      { text: 'Day', value: 'day' },
+      { text: 'Hour', value: 'hour' }
     ],
     events: [],
+    waiting: false,
     showModal: false
   }),
   methods: {
     polygonColor(cell) {
       return this.selectedCell && cell.id === this.selectedCell.id ? '#ff7800' : '#333333';
     },
-    onClick(e) {
-      this.fetchRainsByCoord(e.latlng.lng, e.latlng.lat);
+    handleClickMap(e) {
+      this.fetchRains(e.latlng.lng, e.latlng.lat);
     },
-    fetchEvents() {
+    showEventList(e) {
       fetch('/events')
         .then(res => res.json())
         .then(data => {
@@ -99,32 +119,30 @@ export default {
           this.showModal = true;
         });
     },
-    fetchRainByEvent(event) {
-      const params = new URLSearchParams();
-      params.set('simulationId', this.simulations.find(s => s.name === event.simulation_name).id);
-      params.set('cellId', this.selectedCell.id);
-      params.set('startDate', new Date(Date.parse(this.start) - (6 * 24 * 60 * 60 * 1000)));
-      params.set('endDate', new Date(Date.parse(this.start) + (8 * 24 * 60 * 60 * 1000)));
-      fetch(`/rain?${params.toString()}`)
-        .then(res => res.json())
-        .then(data => {
-          this.data = data;
-          this.showModal = false;
-        });
+    selectEvent(event) {
+      const t = new Date(event.start_date).getTime();
+      this.start = new Date(t - (3 * 24 * 60 * 60 * 1000));
+      this.end = new Date(t + (3 * 24 * 60 * 60 * 1000));
+      this.showModal = false;
     },
-    fetchRainsByCoord(lng, lat) {
+    fetchRains(lng, lat) {
       const params = new URLSearchParams();
       params.set('lon', lng);
       params.set('lat', lat);
       params.set('simulationIds', this.selectedSimulations.join(','));
       params.set('startDate', this.start);
       params.set('endDate', this.end);
+      this.waiting = true;
       fetch(`/rains?${params.toString()}`)
         .then(res => res.json())
         .then(data => {
+          data.labels = data.labels.map(s => {
+            const d = new Date(s);
+            return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:00`;
+          });
           this.selectedCell = data.cell;
           this.data = data;
-          this.fetchEvents();
+          this.waiting = false;
         });
     },
     swapLatLng(polygon) {
@@ -137,7 +155,8 @@ export default {
       const start = new Date(experiment.start_date);
       const end = new Date(experiment.end_date);
       this.start = start;
-      this.end = end;
+      // this.end = end;
+      this.end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
       this.disabledDates = {
         to: start,
         from: end,
@@ -164,6 +183,7 @@ html, body, #app
   width: 50%
   height: 50vh
 #controller
+  overflow-y: scroll
   float: left
   padding: 20px
   dt
@@ -180,4 +200,6 @@ html, body, #app
   cursor: crosshair
 #app
   font-family: 'Avenir', Helvetica, Arial, sans-serif
+.waiting
+  cursor: progress
 </style>

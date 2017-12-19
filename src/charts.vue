@@ -35,6 +35,9 @@ export default Vue.extend({
       }
     }
   },
+  mounted() {
+    this.render();
+  },
   updated() {
     this.render();
   }

@@ -9,7 +9,7 @@
         td.three-day-rain 積算降水量[mm]
         td.simulation-name シミュレーション名
       tbody
-        tr(v-for="event in events", @click="$emit('fetchRainByEvent', event)")
+        tr(v-for="event in events", @click="$emit('handleSelectEvent', event)")
           th.date {{ event.start_date | truncateDate }}
           td.three-day-rain {{ event.three_day_rain | fixFloatingDecimal }}
           td.simulation-name {{ event.simulation_name }}
@@ -27,9 +27,8 @@ export default {
       return v.slice(0, 10).replace(/-/g, '/');
     }
   }
-}
+};
 </script>
-
 
 <style lang="sass" scoped>
 .modal

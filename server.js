@@ -45,21 +45,6 @@ app.get('/cells', async (req, res) => {
   }));
 });
 
-app.get('/rain', async (req, res) => {
-  const cellId = req.query.cellId;
-  const simulationId = req.query.simulationId;
-  const start = new Date(req.query.startDate);
-  const end = new Date(req.query.endDate);
-  end.setDate(end.getDate() + 1);
-  const datetimes = await getDatetimes(start, end);
-  const simulation = await getSimulation(simulationId);
-  const rains = await getRains(simulationId, cellId, start, end);
-  res.json({
-    labels: datetimes.map(({datetime}) => datetime.toISOString().substr(0, 10)),
-    ensembles: [{name: simulation.name, data: rains.map(({sumx}) => sumx)}],
-  });
-});
-
 app.get('/rains', async (req, res) => {
   const {lat, lon} = req.query;
   const cellType = 1;
@@ -81,7 +66,7 @@ app.get('/rains', async (req, res) => {
   }
   res.json({
     cell,
-    labels: datetimes.map(({datetime}) => datetime.toISOString().substr(0, 10)),
+    labels: datetimes.map(({datetime}) => datetime.toISOString()),
     ensembles,
   });
 });

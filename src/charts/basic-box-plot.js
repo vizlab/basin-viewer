@@ -1,7 +1,15 @@
 import {html, render} from 'lit-html';
 import HighCharts from 'highcharts';
-import HighChartsMore from '../../node_modules/highcharts/highcharts-more';
+import HighChartsMore from 'highcharts/highcharts-more';
+
 HighChartsMore(HighCharts);
+
+const median = (d, start, stop) => {
+  const size = stop - start + 1;
+  return size % 2 == 0
+    ? (d[start + size / 2 - 1] + d[start + size / 2]) / 2
+    : d[start + (size - 1) / 2];
+};
 
 const template = html`
 <style>
@@ -75,31 +83,17 @@ class BasicBoxPlot extends window.HTMLElement {
   }
 
   load (data) {
-    const boxes = [];
-
-    const timestampData = [];
-    data.ensembles.forEach(d => {
-      d.data.forEach((_d, idx) => {
-        if(!timestampData[idx]) {
-          timestampData[idx] = [];
-        }
-        timestampData[idx].push(_d);
-      });
+    const boxes = data.labels.map((_, i) => {
+      const d = data.ensembles.map(({data}) => data[i]);
+      d.sort((v1, v2) => v2 - v1);
+      const min = d[0];
+      const lq = median(d, 0, (d.length - (d.length % 2 == 0 ? 2 : 1)) / 2);
+      const m = median(d, 0, d.length - 1);
+      const uq = median(d, (d.length - (d.length % 2 == 0 ? 0 : 1)) / 2, d.length - 1);
+      const max = d[d.length - 1];
+      return [max, uq, m, lq, min];
     });
 
-    timestampData.forEach((d, idx) => {
-      let min = 0;
-      let max = 0;
-      const m = median(d);
-      const lq = median(d.filter(_d => _d <= m));
-      const uq = median(d.filter(_d => _d >= m));
-
-      d.forEach(_d => {
-        min = Math.min(min, _d);
-        max = Math.max(max, _d);
-      });
-      boxes.push([min, lq, m, uq, max]);
-    });
     this.options.series = [
       {
         showInLegend: false,
@@ -133,14 +127,3 @@ class BasicBoxPlot extends window.HTMLElement {
 }
 
 window.customElements.define('viz-basic-box-plot', BasicBoxPlot);
-
-const median = (arr, fn) => {
-  const half = (arr.length/2)|0;
-  const temp = arr.sort(fn);
-
-  if (temp.length%2) {
-    return temp[half];
-  }
-
-  return (temp[half-1] + temp[half])/2;
-};

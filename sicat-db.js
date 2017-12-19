@@ -98,4 +98,4 @@ exports.getEvents = (experimentName, areacode, startDate, endDate) => {
   return pool.query(query, [experimentName, areacode, startDate, endDate])
     .then(res => console.log(res.rows))
     .catch(e => console.error(e.stack));
-}
+};
