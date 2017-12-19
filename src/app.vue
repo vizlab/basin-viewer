@@ -1,5 +1,5 @@
 <template lang="pug">
-#app(v-bind:class="{waiting: waiting}")
+#app(:class="{waiting: waiting}")
   #controller
     .field.is-horizontal
       .field-label.is-normal: label.label Experiment
@@ -19,12 +19,12 @@
         datepicker(v-model="end", format="yyyy/MM/dd" :disabled="disabledDates", input-class="input")
     .field.is-horizontal
       .field-label.is-normal
-      .field-body: .field.is-narrow: .control: button.button(v-on:click="showEventList") Show Event List
+      .field-body: .field.is-narrow: .control: button.button(@click="showEventList") Show Event List
     .field.is-horizontal
       .field-label.is-normal: label.label Range
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedRange")
-          option(v-for="option in rangeOptions" v-bind:value="option.value") {{ option.text }}
+          option(v-for="option in rangeOptions", :value="option.value") {{ option.text }}
     .field.is-horizontal
       .field-label.is-normal: label.label Map Type
       .field-body: .field.is-narrow: .control: .select
@@ -35,7 +35,7 @@
       .field-label.is-normal: label.label Chart Type
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedGraph")
-          option(v-for="option in graphOptions" v-bind:value="option.value") {{ option.text }}
+          option(v-for="option in graphOptions", :value="option.value") {{ option.text }}
     .information(v-if="cells.length > 0")
   v-map(:zoom=6, :center="[35.4233, 136.7607]", @l-click="handleClickMap")
     v-tilelayer(:url="map")
@@ -198,6 +198,8 @@ html, body, #app
 .vue2leaflet-map.leaflet-container
   float: right
   cursor: crosshair
+  .waiting &
+    cursor: progress
 #app
   font-family: 'Avenir', Helvetica, Arial, sans-serif
 .waiting
