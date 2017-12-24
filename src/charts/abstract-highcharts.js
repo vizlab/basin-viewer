@@ -1,5 +1,8 @@
 import {html, render} from 'lit-html';
-import HighChart from 'highcharts';
+import HighCharts from 'highcharts';
+import HighChartsMore from 'highcharts/highcharts-more';
+HighChartsMore(HighCharts);
+
 
 const template = html`
 <style>
@@ -37,9 +40,10 @@ export class AbstractHighChart extends window.HTMLElement {
   }
 
   render () {
+    // TODO use redraw
     if (this.chart) {
       this.chart.destroy();
     }
-    this.chart = HighChart.chart(this.shadowRoot.querySelector('.chart'), this.options);
+    this.chart = HighCharts.chart(this.shadowRoot.querySelector('.chart'), this.options);
   }
 }

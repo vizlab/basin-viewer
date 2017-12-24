@@ -1,18 +1,6 @@
-import {html, render} from 'lit-html';
-import HighCharts from 'highcharts';
+import {AbstractHighChart} from './abstract-highcharts';
 
-const template = html`
-<style>
-:host {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-</style>
-<div class="line-chart-content" />
-`;
-
-class BasicLineChart extends window.HTMLElement {
+class BasicLineChart extends AbstractHighChart {
   static get observedAttributes () {
     return [
       'y-axis-title'
@@ -39,24 +27,6 @@ class BasicLineChart extends window.HTMLElement {
       },
       series: []
     };
-
-    const shadowRoot = this.attachShadow({mode: 'open'});
-    render(template, shadowRoot);
-  }
-
-  connectedCallback () {
-    this.options.chart.width = this.clientWidth;
-    this.options.chart.height = this.clientHeight;
-    this.render();
-    this.handleResize = () => {
-      this.chart.setSize(this.clientWidth, this.clientHeight, false);
-    };
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  disconnectedCallback () {
-    this.chart.destroy();
-    window.removeEventListener('reisze', this.handleResize);
   }
 
   attributeChangedCallback (attrName, oldVal, newVal) {
@@ -67,23 +37,10 @@ class BasicLineChart extends window.HTMLElement {
     }
   }
 
-  adoptedCallback () {
-  }
-
   load (data) {
     this.options.xAxis.categories = data.labels;
     this.options.series = data.ensembles;
     this.render();
-  }
-
-  render () {
-    // TODO use redraw
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    if (this.options) {
-      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.line-chart-content'), this.options);
-    }
   }
 
   get yAxisTitle () {
