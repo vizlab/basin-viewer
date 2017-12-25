@@ -1,18 +1,6 @@
-import {html, render} from 'lit-html';
-import HighCharts from 'highcharts';
+import {AbstractHighChart} from './abstract-highcharts';
 
-const template = html`
-<style>
-:host {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-</style>
-<div class="histogram-content" />
-`;
-
-class BasicHistogram extends window.HTMLElement {
+class BasicHistogram extends AbstractHighChart {
   static get observedAttributes () {
     return [
       'y-axis-title'
@@ -21,6 +9,7 @@ class BasicHistogram extends window.HTMLElement {
 
   constructor () {
     super();
+
     this.options = {
       chart: {
         type: 'column',
@@ -37,23 +26,6 @@ class BasicHistogram extends window.HTMLElement {
         }
       }
     };
-    const shadowRoot = this.attachShadow({mode: 'open'});
-    render(template, shadowRoot);
-  }
-
-  connectedCallback () {
-    this.options.chart.width = this.clientWidth;
-    this.options.chart.height = this.clientHeight;
-    this.render();
-    this.handleResize = () => {
-      this.chart.setSize(this.clientWidth, this.clientHeight, false);
-    };
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  disconnectedCallback () {
-    this.chart.destroy();
-    window.removeEventListener('reisze', this.handleResize);
   }
 
   attributeChangedCallback (attrName, oldVal, newVal) {
@@ -62,9 +34,6 @@ class BasicHistogram extends window.HTMLElement {
         // this.options.yAxis[0].title.text = this.yAxisTitle;
         break;
     }
-  }
-
-  adoptedCallback () {
   }
 
   load (data, options) {
@@ -92,16 +61,6 @@ class BasicHistogram extends window.HTMLElement {
     });
 
     this.render();
-  }
-
-  render () {
-    // TODO use redraw
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    if (this.options) {
-      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.histogram-content'), this.options);
-    }
   }
 
   get yAxisTitle () {

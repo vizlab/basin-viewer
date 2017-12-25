@@ -1,8 +1,4 @@
-import {html, render} from 'lit-html';
-import HighCharts from 'highcharts';
-import HighChartsMore from 'highcharts/highcharts-more';
-
-HighChartsMore(HighCharts);
+import {AbstractHighChart} from './abstract-highcharts';
 
 const median = (d, start, stop) => {
   const size = stop - start + 1;
@@ -11,18 +7,7 @@ const median = (d, start, stop) => {
     : d[start + (size - 1) / 2];
 };
 
-const template = html`
-<style>
-:host {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-</style>
-<div class="box-plot-content" />
-`;
-
-class BasicBoxPlot extends window.HTMLElement {
+class BasicBoxPlot extends AbstractHighChart {
   static get observedAttributes () {
     return [
       'y-axis-title'
@@ -51,24 +36,6 @@ class BasicBoxPlot extends window.HTMLElement {
       },
       series: []
     };
-
-    const shadowRoot = this.attachShadow({mode: 'open'});
-    render(template, shadowRoot);
-  }
-
-  connectedCallback () {
-    this.options.chart.width = this.clientWidth;
-    this.options.chart.height = this.clientHeight;
-    this.render();
-    this.handleResize = () => {
-      this.chart.setSize(this.clientWidth, this.clientHeight, false);
-    };
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  disconnectedCallback () {
-    this.chart.destroy();
-    window.removeEventListener('reisze', this.handleResize);
   }
 
   attributeChangedCallback (attrName, oldVal, newVal) {
@@ -77,9 +44,6 @@ class BasicBoxPlot extends window.HTMLElement {
         // this.options.yAxis.title.text = this.yAxisTitle;
         break;
     }
-  }
-
-  adoptedCallback () {
   }
 
   load (data) {
@@ -102,16 +66,6 @@ class BasicBoxPlot extends window.HTMLElement {
     ];
     this.options.xAxis.categories = data.labels;
     this.render();
-  }
-
-  render () {
-    // TODO use redraw
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    if (this.options) {
-      this.chart = HighCharts.chart(this.shadowRoot.querySelector('.box-plot-content'), this.options);
-    }
   }
 
   get yAxisTitle () {
