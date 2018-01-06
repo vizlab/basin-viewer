@@ -4,6 +4,7 @@
   viz-basic-histogram(ref="histogram", y-axis-title="rainfall", v-if="graphType == 'basic-histogram'")
   viz-basic-stacked-area-chart(ref="stackedAreaChart", y-axis-title="rainfall", v-if="graphType == 'basic-stacked-area-chart'")
   viz-basic-box-plot(ref="boxPlot", y-axis-title="rainfall", v-if="graphType == 'basic-box-plot'")
+  viz-basic-error-bar-chart(ref="errorBarChart", y-axis-title="rainfall", v-if="graphType == 'basic-error-bar-chart'")
 </template>
 
 <script>
@@ -31,6 +32,9 @@ export default Vue.extend({
           break;
         case ('basic-box-plot'):
           this.$refs.boxPlot.load(this.data);
+          break;
+        case ('basic-error-bar-chart'):
+          this.$refs.errorBarChart.load(this.data);
           break;
       }
     }
