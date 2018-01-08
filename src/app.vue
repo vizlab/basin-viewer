@@ -91,7 +91,8 @@ export default {
       { text: 'Line Chart', value: 'basic-line-chart' },
       { text: 'Histogram', value: 'basic-histogram' },
       { text: 'Area Chart', value: 'basic-stacked-area-chart' },
-      { text: 'Box Plot', value: 'basic-box-plot' }
+      { text: 'Box Plot', value: 'basic-box-plot' },
+      { text: 'Bar Chart', value: 'basic-error-bar-chart' }
     ],
     selectedRange: 'hour',
     rangeOptions: [

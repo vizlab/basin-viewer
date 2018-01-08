@@ -5,6 +5,7 @@ import './charts/basic-line-chart';
 import './charts/basic-histogram';
 import './charts/basic-stacked-area-chart';
 import './charts/basic-box-plot';
+import './charts/basic-error-bar-chart';
 
 Vue.component('v-map', Vue2Leaflet.Map);
 Vue.component('v-tilelayer', Vue2Leaflet.TileLayer);

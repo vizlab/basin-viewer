@@ -27,12 +27,12 @@ export class AbstractHighChart extends window.HTMLElement {
     this.options.chart.width = this.clientWidth;
     this.options.chart.height = this.clientHeight;
     this.render();
+    this.handleResize = () => {
+      this.chart.setSize(this.clientWidth, this.clientHeight, false);
+    };
     window.addEventListener('resize', this.handleResize);
   }
 
-  handleResize () {
-    this.chart.setSize(this.clientWidth, this.clientHeight, false);
-  }
 
   disconnectedCallback () {
     this.chart.destroy();
