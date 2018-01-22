@@ -6,13 +6,22 @@ const wkx = require('wkx');
 const {
   getCell,
   getCells,
+  getCellByCoordinates,
+  getExperiment,
   getExperiments,
   getSimulation,
   getSimulations,
   getDatetimes,
+  getDates,
+  getYearMonths,
+  getYears,
   getRains,
+  getDailyRains,
+  getMonthlyRains,
+  getYearlyRains,
   getEvents
 } = require('./sicat-db');
+const {ensureUTC} = require('./date');
 
 app.all('/', basicAuth((user, pass) => {
   return process.env.USER === user && process.env.PASS === pass;
@@ -34,8 +43,8 @@ app.get('/simulations', async (req, res) => {
 });
 
 app.get('/cells', async (req, res) => {
-  const cellType = 1;
-  const cells = await getCells(cellType);
+  const {cellType, limit} = req.query;
+  const cells = await getCells(cellType, limit);
   res.json(cells.map(({id, geog}) => {
     const buffer = new Buffer(geog, 'hex');
     return {
@@ -46,22 +55,42 @@ app.get('/cells', async (req, res) => {
 });
 
 app.get('/rains', async (req, res) => {
-  const {lat, lon} = req.query;
-  const cellType = 1;
+  const measureFunctions = {
+    avg: d => d.sumx / d.cntx,
+    min: d => d.minx,
+    max: d => d.maxx
+  };
+  const datetimeFunctions = {
+    hour: getDatetimes,
+    day: getDates,
+    month: getYearMonths,
+    year: getYears
+  };
+  const rainFunctions = {
+    hour: getRains,
+    day: getDailyRains,
+    month: getMonthlyRains,
+    year: getYearlyRains
+  };
+
+  const {lat, lon, range, measure, cellType} = req.query;
   const simulationIds = req.query.simulationIds.split(',');
-  const start = new Date(req.query.startDate);
-  const end = new Date(req.query.endDate);
-  end.setDate(end.getDate() + 1);
-  const cell = await getCell(cellType, lat, lon);
-  const datetimes = await getDatetimes(start, end);
+  const start = ensureUTC(new Date(req.query.startDate));
+  const end = ensureUTC(new Date(req.query.endDate));
+  const measureFunction = measureFunctions[measure] || measureFunctions.avg;
+  const datetimeFunction = datetimeFunctions[range] || datetimeFunctions.year;
+  const rainFunction = rainFunctions[range] || rainFunctions.year;
+
+  const cell = await getCellByCoordinates(cellType, lat, lon);
+  const datetimes = await datetimeFunction(start, end);
   // TODO improve performance
   const ensembles = [];
   for (const simulationId of simulationIds) {
     const simulation = await getSimulation(simulationId);
-    const rains = await getRains(simulationId, cell.id, start, end);
+    const rains = await rainFunction(simulationId, cell.id, start, end);
     ensembles.push({
       name: simulation.name,
-      data: rains.map(({sumx}) => sumx),
+      data: rains.map(measureFunction),
     });
   }
   res.json({
@@ -72,10 +101,12 @@ app.get('/rains', async (req, res) => {
 });
 
 app.get('/events', async (req, res) => {
-  // WARN: This is INSANELY slow, so we use dummy data for now.
-  // This func should be called from '/rains' and be provided at once
-  // const events = await getEvents(experimentName, cellId, start, end);
-  const events = require('./data/dummy_events.json');
+  const {experimentId, cellId} = req.query;
+  const start = ensureUTC(new Date(req.query.startDate));
+  const end = ensureUTC(new Date(req.query.endDate));
+  const cell = await getCell(cellId);
+  const experiment = await getExperiment(experimentId);
+  const events = await getEvents(experiment.name, cell.codename, start, end);
   res.json({events});
 });
 

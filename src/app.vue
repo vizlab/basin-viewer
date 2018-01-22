@@ -2,6 +2,11 @@
 #app(:class="{waiting: waiting}")
   #controller
     .field.is-horizontal
+      .field-label.is-normal: label.label Cell Type
+      .field-body: .field.is-narrow: .control: .select
+        select(v-model="selectedCellType")
+          option(v-for="option in cellTypeOptions", :value="option.value") {{ option.text }}
+    .field.is-horizontal
       .field-label.is-normal: label.label Experiment
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedExperimentId")
@@ -26,6 +31,11 @@
         select(v-model="selectedRange")
           option(v-for="option in rangeOptions", :value="option.value") {{ option.text }}
     .field.is-horizontal
+      .field-label.is-normal: label.label Measure
+      .field-body: .field.is-narrow: .control: .select
+        select(v-model="selectedMeasure")
+          option(v-for="option in measureOptions", :value="option.value") {{ option.text }}
+    .field.is-horizontal
       .field-label.is-normal: label.label Map Type
       .field-body: .field.is-narrow: .control: .select
         select(v-model="map")
@@ -40,8 +50,9 @@
   v-map(:zoom=6, :center="[35.4233, 136.7607]", @l-click="handleClickMap")
     v-tilelayer(:url="map")
     .loop(v-for="cell in cells")
-      .polygons(v-for="polygon in cell.geometry.coordinates")
-        v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: 1}')
+      .polygons(v-for="multiPolygon in cell.geometry.coordinates")
+        .polygon(v-for="polygon in multiPolygon" )
+          v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: 1}')
   charts(:graphType="selectedGraph", :data="data")
   modal(v-if="showModal", :events="events", @close="showModal = false", @handleSelectEvent="selectEvent")
 </template>
@@ -58,11 +69,7 @@ export default {
     modal: Modal
   },
   mounted () {
-    fetch('/cells')
-      .then(res => res.json())
-      .then(data => {
-        this.cells = data;
-      });
+    this.selectedCellType = 1;
     fetch('/experiments')
       .then(res => res.json())
       .then(data => {
@@ -71,6 +78,11 @@ export default {
       });
   },
   data: () => ({
+    selectedCellType: null,
+    cellTypeOptions: [
+      { text: 'Prefecture', value: 1 },
+      { text: 'Basin', value: 2 }
+    ],
     cells: [],
     data: {
       cell: null,
@@ -94,7 +106,7 @@ export default {
       { text: 'Box Plot', value: 'basic-box-plot' },
       { text: 'Bar Chart', value: 'basic-error-bar-chart' }
     ],
-    selectedRange: 'hour',
+    selectedRange: 'year',
     rangeOptions: [
       { text: 'Year', value: 'year' },
       { text: 'Month', value: 'month' },
@@ -102,6 +114,12 @@ export default {
       { text: 'Hour', value: 'hour' }
     ],
     events: [],
+    selectedMeasure: 'avg',
+    measureOptions: [
+      { text: 'Avg', value: 'avg' },
+      { text: 'Max', value: 'max' },
+      { text: 'Min', value: 'min' }
+    ],
     waiting: false,
     showModal: false
   }),
@@ -113,7 +131,12 @@ export default {
       this.fetchRains(e.latlng.lng, e.latlng.lat);
     },
     showEventList(e) {
-      fetch('/events')
+      const params = new URLSearchParams();
+      params.set('experimentId', this.selectedExperimentId);
+      params.set('cellId', this.selectedCell.id);
+      params.set('startDate', this.start);
+      params.set('endDate', this.end);
+      fetch(`/events?${params.toString()}`)
         .then(res => res.json())
         .then(data => {
           this.events = data.events;
@@ -133,6 +156,9 @@ export default {
       params.set('simulationIds', this.selectedSimulations.join(','));
       params.set('startDate', this.start);
       params.set('endDate', this.end);
+      params.set('range', this.selectedRange);
+      params.set('measure', this.selectedMeasure);
+      params.set('cellType', this.selectedCellType);
       this.waiting = true;
       fetch(`/rains?${params.toString()}`)
         .then(res => res.json())
@@ -147,7 +173,7 @@ export default {
         });
     },
     swapLatLng(polygon) {
-      return polygon[0].map(n => [n[1], n[0]]);
+      return polygon.map(n => [n[1], n[0]]);
     }
   },
   watch: {
@@ -156,8 +182,7 @@ export default {
       const start = new Date(experiment.start_date);
       const end = new Date(experiment.end_date);
       this.start = start;
-      // this.end = end;
-      this.end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+      this.end = end;
       this.disabledDates = {
         to: start,
         from: end,
@@ -170,6 +195,16 @@ export default {
         .then(data => {
           this.simulations = data;
           this.selectedSimulations = data.map(d => d.id);
+        });
+    },
+    selectedCellType (val) {
+      const params = new URLSearchParams();
+      params.set('cellType', this.selectedCellType);
+      params.set('limit', 200);
+      fetch(`/cells?${params.toString()}`)
+        .then(res => res.json())
+        .then(data => {
+          this.cells = data;
         });
     }
   }

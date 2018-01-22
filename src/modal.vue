@@ -2,12 +2,12 @@
 .modal.is-active
   .modal-background(@click="$emit('close')")
   .modal-content: .box
-    p: b 三日間積算降水量上位10ケース
+    p: b Cumulative rainfall for three days
     table.table.is-hoverable.is-fullwidth
       thead: tr
-        td.date 初降水日
-        td.three-day-rain 積算降水量[mm]
-        td.simulation-name シミュレーション名
+        td.date Date
+        td.three-day-rain Cumulative rainfall [mm]
+        td.simulation-name Ensemble name
       tbody
         tr(v-for="event in events", @click="$emit('handleSelectEvent', event)")
           th.date {{ event.start_date | truncateDate }}
