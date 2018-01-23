@@ -159,7 +159,7 @@ exports.getRains = (simulationId, cellId, startDate, endDate) => {
   const start = currentDate(startDate);
   const end = nextDate(endDate);
   const query = `
-  SELECT cntx, sumx
+  SELECT cntx, minx, maxx, sumx
   FROM sd_rain JOIN m_datetime ON sd_rain.datetimeid = m_datetime.id
   WHERE sd_rain.cellid = $1
     AND $2::TIMESTAMP <= m_datetime.datetime
