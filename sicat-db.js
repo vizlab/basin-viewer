@@ -110,6 +110,17 @@ exports.getDatetimes = (startDate, endDate) => {
     .catch(e => console.error(e.stack));
 };
 
+exports.getDate = d => {
+  const query = `
+    SELECT id, start_date AS datetime
+    FROM m_date
+    WHERE start_date = $1
+  `
+  return pool.query(query, [d])
+    .then(res => res.rows[0])
+    .catch(e => console.error(e.stack));
+};
+
 exports.getDates = (startDate, endDate) => {
   const start = currentDate(startDate);
   const end = nextDate(endDate);
@@ -223,9 +234,26 @@ exports.getYearlyRains = (simulationId, cellId, startDate, endDate) => {
     .catch(e => console.error(e.stack));
 };
 
-exports.getEvents = (experimentName, areacode, startDate, endDate) => {
-  const query = 'SELECT * FROM xq_ex1($1, $2, $3, $4)';
-  return pool.query(query, [experimentName, areacode, startDate, endDate])
+exports.getEvents = (experimentId, cellId, startDateId, endDateId, days) => {
+  const query = `
+  SELECT
+    start_date,
+    name AS simulation_name,
+    total AS three_day_rain
+  FROM (
+      SELECT dateid, name, (SUM(sumx / cntx * 24) OVER (PARTITION BY simulationid ORDER BY dateid ROWS BETWEEN 0 PRECEDING AND $5 FOLLOWING)) AS total
+      FROM sd_drain
+        JOIN m_simulation ON sd_drain.simulationid = m_simulation.id
+      WHERE cellid = $2
+        AND experimentid = $1
+        AND $3 <= dateid
+        AND dateid <= $4
+      ORDER BY total DESC
+      LIMIT 10
+    ) AS ret
+    JOIN m_date ON ret.dateid = m_date.id;
+  `;
+  return pool.query(query, [experimentId, cellId, startDateId, endDateId, days - 1])
     .then(res => res.rows)
     .catch(e => console.error(e.stack));
 };

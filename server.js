@@ -12,6 +12,7 @@ const {
   getSimulation,
   getSimulations,
   getDatetimes,
+  getDate,
   getDates,
   getYearMonths,
   getYears,
@@ -102,11 +103,9 @@ app.get('/rains', async (req, res) => {
 
 app.get('/events', async (req, res) => {
   const {experimentId, cellId} = req.query;
-  const start = ensureUTC(new Date(req.query.startDate));
-  const end = ensureUTC(new Date(req.query.endDate));
-  const cell = await getCell(cellId);
-  const experiment = await getExperiment(experimentId);
-  const events = await getEvents(experiment.name, cell.codename, start, end);
+  const start = await getDate(ensureUTC(new Date(req.query.startDate)));
+  const end = await getDate(ensureUTC(new Date(req.query.endDate)));
+  const events = await getEvents(experimentId, cellId, start.id, end.id, 3);
   res.json({events});
 });
 
