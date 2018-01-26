@@ -43,11 +43,10 @@ def outpath(filename, dest):
 
 
 def month_hours(year, month):
-    d = datetime(year, month, 1, 1, 0)
+    d = datetime(year, month, 1, 0, 0)
     while d.month == month:
         yield d
         d += timedelta(hours=1)
-    yield d
 
 
 def process(args):
