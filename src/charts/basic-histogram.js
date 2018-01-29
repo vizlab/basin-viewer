@@ -53,6 +53,7 @@ class BasicHistogram extends AbstractHighChart {
       });
     });
 
+    this.options.series = [];
     histograms.forEach((histogram, idx) => {
       this.options.series.push({
         name: data.ensembles[idx].name,
