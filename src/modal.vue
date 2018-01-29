@@ -2,12 +2,12 @@
 .modal.is-active
   .modal-background(@click="$emit('close')")
   .modal-content: .box
-    p: b Cumulative rainfall for three days
+    p: b {{ $t("modal.desc") }}
     table.table.is-hoverable.is-fullwidth
       thead: tr
-        td.date Date
-        td.three-day-rain Cumulative rainfall [mm]
-        td.simulation-name Ensemble name
+        td.date {{ $t("modal.date") }}
+        td.three-day-rain {{ $t("modal.rainfall") }}
+        td.simulation-name {{ $t("modal.ensemble") }}
       tbody
         tr(v-for="event in events", @click="$emit('handleSelectEvent', event)")
           th.date {{ event.start_date | truncateDate }}

@@ -1,51 +1,57 @@
 <template lang="pug">
 #app(:class="{waiting: waiting}")
   #controller
+    .language-selector.buttons.has-addons
+      a.button.is-text(:class="{'is-active': $i18n.locale === 'ja'}", @click="$i18n.locale = 'ja'") 日本語
+      a.button.is-text(:class="{'is-active': $i18n.locale === 'en'}", @click="$i18n.locale = 'en'") English
     .field.is-horizontal
-      .field-label.is-normal: label.label Cell Type
+      .field-label.is-normal: label.label {{ $t("labels.cell_type") }}
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedCellType")
-          option(v-for="option in cellTypeOptions", :value="option.value") {{ option.text }}
+          option(value="1") {{ $t("options.prefecture") }}
+          option(value="2") {{ $t("options.basin") }}
     .field.is-horizontal
-      .field-label.is-normal: label.label Experiment
+      .field-label.is-normal: label.label {{ $t("labels.experiment") }}
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedExperimentId")
-          option(v-for="experiment in experiments", :value="experiment.id") {{experiment.nameenglish}}
+          option(v-for="experiment in experiments", :value="experiment.id") {{ experiment.nameenglish }}
     .field.is-horizontal
-      .field-label.is-normal: label.label Simulations
+      .field-label.is-normal: label.label {{ $t("labels.simulations") }}
       .field-body: .field.is-narrow: .control: .select.is-multiple
         select(v-model="selectedSimulations" multiple)
-          option(v-for="simulation in simulations", :value="simulation.id") {{simulation.name}}
+          option(v-for="simulation in simulations", :value="simulation.id") {{ simulation.name }}
     .field.is-horizontal
-      .field-label.is-normal: label.label Period
+      .field-label.is-normal: label.label {{ $t("labels.period") }}
       .field-body: .field.is-narrow: .control
         datepicker(v-model="start", format="yyyy/MM/dd" :disabled="disabledDates", input-class="input")
-        span.tilda  ~
+        span.tilda ~
         datepicker(v-model="end", format="yyyy/MM/dd" :disabled="disabledDates", input-class="input")
+        span &nbsp;
+        button.button(@click="showEventList") {{ $t("buttons.show_event_list") }}
     .field.is-horizontal
-      .field-label.is-normal
-      .field-body: .field.is-narrow: .control: button.button(@click="showEventList") Show Event List
-    .field.is-horizontal
-      .field-label.is-normal: label.label Range
+      .field-label.is-normal: label.label {{ $t("labels.range") }}
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedRange")
-          option(v-for="option in rangeOptions", :value="option.value") {{ option.text }}
+          each val in ['year', 'month', 'day', 'hour']
+            option(value=val)= `{{ $t("options.${val}") }}`
     .field.is-horizontal
-      .field-label.is-normal: label.label Measure
+      .field-label.is-normal: label.label {{ $t("labels.measure") }}
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedMeasure")
-          option(v-for="option in measureOptions", :value="option.value") {{ option.text }}
+          each val in ['avg', 'max', 'min']
+            option(value=val)= `{{ $t("options.${val}") }}`
     .field.is-horizontal
-      .field-label.is-normal: label.label Map Type
+      .field-label.is-normal: label.label {{ $t("labels.map_type") }}
       .field-body: .field.is-narrow: .control: .select
         select(v-model="map")
-          option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") Ordinary
-          option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda
+          option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") {{ $t("options.ordinary") }}
+          option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") {{ $t("options.hydda") }}
     .field.is-horizontal
-      .field-label.is-normal: label.label Chart Type
+      .field-label.is-normal: label.label {{ $t("labels.chart_type") }}
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedGraph")
-          option(v-for="option in graphOptions", :value="option.value") {{ option.text }}
+          each val in ['line_chart', 'histogram', 'stacked_area_chart', 'box_plot', 'error_bar_chart']
+            option(value=`basic-${val.replace(/_/g, '-')}`)= `{{ $t("graphs.${val}") }}`
     .information(v-if="cells.length > 0")
   v-map(:zoom=6, :center="[35.4233, 136.7607]", @l-click="handleClickMap")
     v-tilelayer(:url="map")
@@ -79,10 +85,6 @@ export default {
   },
   data: () => ({
     selectedCellType: null,
-    cellTypeOptions: [
-      { text: 'Prefecture', value: 1 },
-      { text: 'Basin', value: 2 }
-    ],
     cells: [],
     data: {
       cell: null,
@@ -99,27 +101,9 @@ export default {
     end: new Date('2050/09/30'),
     disabledDates: {},
     selectedGraph: 'basic-box-plot',
-    graphOptions: [
-      { text: 'Line Chart', value: 'basic-line-chart' },
-      { text: 'Histogram', value: 'basic-histogram' },
-      { text: 'Area Chart', value: 'basic-stacked-area-chart' },
-      { text: 'Box Plot', value: 'basic-box-plot' },
-      { text: 'Bar Chart', value: 'basic-error-bar-chart' }
-    ],
     selectedRange: 'year',
-    rangeOptions: [
-      { text: 'Year', value: 'year' },
-      { text: 'Month', value: 'month' },
-      { text: 'Day', value: 'day' },
-      { text: 'Hour', value: 'hour' }
-    ],
     events: [],
     selectedMeasure: 'avg',
-    measureOptions: [
-      { text: 'Avg', value: 'avg' },
-      { text: 'Max', value: 'max' },
-      { text: 'Min', value: 'min' }
-    ],
     waiting: false,
     showModal: false
   }),
@@ -222,9 +206,14 @@ html, body, #app
   overflow-y: scroll
   float: left
   padding: 20px
+  position: relative
   dt
     float: left
     margin: 0 10px
+  .language-selector
+    position: absolute
+    top: 10px
+    right: 20px
   .vdp-datepicker
     display: inline-block
   .information

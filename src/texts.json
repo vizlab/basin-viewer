@@ -1,0 +1,84 @@
+{
+  "en": {
+    "labels": {
+      "cell_type": "Cell Type",
+      "experiment": "Experiment",
+      "simulations": "Simulations",
+      "period": "Period",
+      "range": "Range",
+      "measure": "Measure",
+      "map_type": "Map Type",
+      "chart_type": "Chart Type"
+    },
+    "options": {
+      "prefecture": "Prefecture",
+      "basin": "Basin",
+      "year": "Year",
+      "month": "Month",
+      "day": "Day",
+      "hour": "Hour",
+      "avg": "AVG",
+      "max": "MAX",
+      "min": "MIN",
+      "hydda": "Hydda",
+      "ordinary": "Ordinary"
+    },
+    "buttons": {
+      "show_event_list": "Show event list"
+    },
+    "graphs": {
+      "line_chart": "Line Chart",
+      "histogram": "Histogram",
+      "stacked_area_chart": "Area Chart",
+      "box_plot": "Box Plot",
+      "error_bar_chart": "Bar Chart"
+    },
+    "modal": {
+      "desc": "Cumulative rainfall for three days",
+      "date": "Date",
+      "rainfall": "Cumulative rainfall [mm]",
+      "ensemble": "Ensemble name"
+    }
+  },
+  "ja": {
+    "labels": {
+      "cell_type": "領域タイプ",
+      "experiment": "実験の種類",
+      "simulations": "アンサンブル選択",
+      "period": "期間",
+      "range": "範囲",
+      "measure": "単位",
+      "map_type": "地図の種類",
+      "chart_type": "グラフの種類"
+    },
+    "options": {
+      "prefecture": "都道府県",
+      "basin": "水域",
+      "year": "年",
+      "month": "月",
+      "day": "日",
+      "hour": "時",
+      "avg": "平均値",
+      "max": "最大値",
+      "min": "最小値",
+      "hydda": "河川",
+      "ordinary": "地域"
+    },
+    "buttons": {
+      "show_event_list": "イベントリストを表示"
+    },
+    "graphs": {
+      "line_chart": "線グラフ",
+      "histogram": "ヒストグラム",
+      "stacked_area_chart": "面グラフ",
+      "box_plot": "箱ひげ図",
+      "error_bar_chart": "棒グラフ"
+    },
+    "modal": {
+      "desc": "三日間積算降水量",
+      "date": "日付",
+      "rainfall": "降水量 [mm]",
+      "ensemble": "アンサンブル"
+    }
+  }
+}
