@@ -5,7 +5,7 @@ const path = require('path');
 const wkx = require('wkx');
 const {
   getCell,
-  getCells,
+  getCellsWithTotalRain,
   getCellByCoordinates,
   getExperiment,
   getExperiments,
@@ -45,11 +45,14 @@ app.get('/simulations', async (req, res) => {
 
 app.get('/cells', async (req, res) => {
   const {cellType, limit} = req.query;
-  const cells = await getCells(cellType, limit);
-  res.json(cells.map(({id, geog}) => {
+  const cells = await getCellsWithTotalRain(cellType, limit);
+  res.json(cells.map(({id, geog, cntx, minx, maxx, sumx}) => {
     const buffer = new Buffer(geog, 'hex');
     return {
       id,
+      avg: sumx / cntx,
+      max: maxx,
+      min: minx,
       geometry: wkx.Geometry.parse(buffer).toGeoJSON()
     };
   }));

@@ -58,7 +58,7 @@
     .loop(v-for="cell in cells")
       .polygons(v-for="multiPolygon in cell.geometry.coordinates")
         .polygon(v-for="polygon in multiPolygon" )
-          v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: 1}')
+          v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: polygonWeight(cell)}')
   charts(:graphType="selectedGraph", :data="data")
   modal(v-if="showModal", :events="events", @close="showModal = false", @handleSelectEvent="selectEvent")
 </template>
@@ -67,6 +67,8 @@
 import Datepicker from 'vuejs-datepicker';
 import Charts from './charts.vue';
 import Modal from './modal.vue';
+import {scaleLinear} from 'd3-scale';
+import {extent} from 'd3-array';
 
 export default {
   components: {
@@ -84,6 +86,7 @@ export default {
       });
   },
   data: () => ({
+    cellColorScale: scaleLinear().range(['#aaaaff', '#0000ff']),
     selectedCellType: null,
     cells: [],
     data: {
@@ -109,7 +112,13 @@ export default {
   }),
   methods: {
     polygonColor(cell) {
-      return this.selectedCell && cell.id === this.selectedCell.id ? '#ff7800' : '#333333';
+      if (cell[this.selectedMeasure] == null) {
+        return '#888888';
+      }
+      return this.cellColorScale(cell[this.selectedMeasure]);
+    },
+    polygonWeight(cell) {
+      return this.selectedCell && cell.id === this.selectedCell.id ? 3 : 1;
     },
     handleClickMap(e) {
       this.fetchRains(e.latlng.lng, e.latlng.lat);
@@ -190,6 +199,12 @@ export default {
         .then(data => {
           this.cells = data;
         });
+    },
+    cells (val) {
+      this.cellColorScale.domain(extent(this.cells, v => v[this.selectedMeasure]));
+    },
+    selectedMeasure (val) {
+      this.cellColorScale.domain(extent(this.cells, v => v[this.selectedMeasure]));
     }
   }
 };

@@ -37,6 +37,26 @@ exports.getCells = (cellType, limit) => {
     .catch(e => console.error(e.stack));
 };
 
+exports.getCellsWithTotalRain = (cellType, limit) => {
+  const query = `
+    SELECT *
+    FROM (SELECT * FROM m_cell WHERE celltype = $1 LIMIT $2) AS m_cell
+      LEFT JOIN (
+        SELECT
+          cellid,
+          SUM(cntx) AS cntx,
+          MIN(minx) AS minx,
+          MAX(maxx) AS maxx,
+          SUM(sumx) AS sumx
+        FROM sd_train
+        GROUP BY cellid
+      ) AS sd_train ON m_cell.id = sd_train.cellid
+  `;
+  return pool.query(query, [cellType, limit])
+    .then(res => res.rows)
+    .catch(e => console.error(e.stack));
+};
+
 exports.getCellByCoordinates = (cellType, lat, lon) => {
   const query = `
     SELECT *
@@ -115,7 +135,7 @@ exports.getDate = d => {
     SELECT id, start_date AS datetime
     FROM m_date
     WHERE start_date = $1
-  `
+  `;
   return pool.query(query, [d])
     .then(res => res.rows[0])
     .catch(e => console.error(e.stack));
