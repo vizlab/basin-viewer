@@ -77,7 +77,7 @@ app.get('/rains', async (req, res) => {
     year: getYearlyRains
   };
 
-  const {lat, lon, range, measure, cellType} = req.query;
+  const {cellId, range, measure} = req.query;
   const simulationIds = req.query.simulationIds.split(',');
   const start = ensureUTC(new Date(req.query.startDate));
   const end = ensureUTC(new Date(req.query.endDate));
@@ -85,20 +85,18 @@ app.get('/rains', async (req, res) => {
   const datetimeFunction = datetimeFunctions[range] || datetimeFunctions.year;
   const rainFunction = rainFunctions[range] || rainFunctions.year;
 
-  const cell = await getCellByCoordinates(cellType, lat, lon);
   const datetimes = await datetimeFunction(start, end);
   // TODO improve performance
   const ensembles = [];
   for (const simulationId of simulationIds) {
     const simulation = await getSimulation(simulationId);
-    const rains = await rainFunction(simulationId, cell.id, start, end);
+    const rains = await rainFunction(simulationId, cellId, start, end);
     ensembles.push({
       name: simulation.name,
       data: rains.map(measureFunction),
     });
   }
   res.json({
-    cell,
     labels: datetimes.map(({datetime}) => datetime.toISOString()),
     ensembles,
   });

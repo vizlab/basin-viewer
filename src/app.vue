@@ -53,12 +53,12 @@
           each val in ['line_chart', 'histogram', 'stacked_area_chart', 'box_plot', 'error_bar_chart']
             option(value=`basic-${val.replace(/_/g, '-')}`)= `{{ $t("graphs.${val}") }}`
     .information(v-if="cells.length > 0")
-  v-map(:zoom=6, :center="[35.4233, 136.7607]", @l-click="handleClickMap")
+  v-map(:zoom=6, :center="[35.4233, 136.7607]")
     v-tilelayer(:url="map")
     .loop(v-for="cell in cells")
       .polygons(v-for="multiPolygon in cell.geometry.coordinates")
         .polygon(v-for="polygon in multiPolygon" )
-          v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: polygonWeight(cell)}')
+          v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: polygonWeight(cell)}', @l-click="handleClickPolygon($event, cell)")
   charts(:graphType="selectedGraph", :data="data")
   modal(v-if="showModal", :events="events", @close="showModal = false", @handleSelectEvent="selectEvent")
 </template>
@@ -120,8 +120,10 @@ export default {
     polygonWeight(cell) {
       return this.selectedCell && cell.id === this.selectedCell.id ? 3 : 1;
     },
-    handleClickMap(e) {
-      this.fetchRains(e.latlng.lng, e.latlng.lat);
+    handleClickPolygon(e, cell) {
+      console.log(e, cell);
+      this.selectedCell = cell;
+      this.fetchRains();
     },
     showEventList(e) {
       const params = new URLSearchParams();
@@ -144,14 +146,12 @@ export default {
     },
     fetchRains(lng, lat) {
       const params = new URLSearchParams();
-      params.set('lon', lng);
-      params.set('lat', lat);
+      params.set('cellId', this.selectedCell.id);
       params.set('simulationIds', this.selectedSimulations.join(','));
       params.set('startDate', this.start);
       params.set('endDate', this.end);
       params.set('range', this.selectedRange);
       params.set('measure', this.selectedMeasure);
-      params.set('cellType', this.selectedCellType);
       this.waiting = true;
       fetch(`/rains?${params.toString()}`)
         .then(res => res.json())
@@ -160,7 +160,6 @@ export default {
             const d = new Date(s);
             return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d.getHours()}:00`;
           });
-          this.selectedCell = data.cell;
           this.data = data;
           this.waiting = false;
         });
