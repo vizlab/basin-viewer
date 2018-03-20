@@ -103,6 +103,29 @@ app.get('/rains', async (req, res) => {
   });
 });
 
+app.get('/yearly-rains', async (req, res) => {
+  const {cellId, range, measure} = req.query;
+  const simulationIds = req.query.simulationIds.split(',').map(id => +id);
+  const start = ensureUTC(new Date(req.query.startDate));
+  const end = ensureUTC(new Date(req.query.endDate));
+
+  const datetimes = await getYears(start, end);
+  const rains = await getYearlyRains(simulationIds, cellId, start, end);
+  const ensembles = simulationIds
+    .map(simulationId => rains.filter(rain => rain.simulationid === simulationId))
+    .filter(items => items.length > 0)
+    .map(items => {
+      return {
+        name: items[0].simulationname,
+        data: items.map(rain => rain.maxx)
+      };
+    });
+  res.json({
+    labels: datetimes.map(({datetime}) => datetime.toISOString()),
+    ensembles,
+  });
+});
+
 app.get('/events', async (req, res) => {
   const {experimentId, cellId} = req.query;
   const start = await getDate(ensureUTC(new Date(req.query.startDate)));

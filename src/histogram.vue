@@ -16,7 +16,7 @@ const fetchHistogramData = (cellId, simulationIds, start, end) => {
   params.set('endDate', end);
   params.set('range', 'year');
   params.set('measure', 'max');
-  return fetch(`/rains?${params.toString()}`)
+  return fetch(`/yearly-rains?${params.toString()}`)
     .then(res => res.json())
     .then(data => {
       data.labels = data.labels.map(s => {

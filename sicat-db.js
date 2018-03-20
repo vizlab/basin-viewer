@@ -108,7 +108,7 @@ exports.getSimulations = experimentId => {
     SELECT *
     FROM m_simulation
     WHERE experimentid = $1
-    ORDER BY ensembleno
+    ORDER BY model, ensembleno
   `;
   return pool.query(query, [experimentId])
     .then(res => res.rows)
@@ -237,19 +237,22 @@ exports.getMonthlyRains = (simulationId, cellId, startDate, endDate) => {
     .catch(e => console.error(e.stack));
 };
 
-exports.getYearlyRains = (simulationId, cellId, startDate, endDate) => {
+exports.getYearlyRains = (simulationIds, cellId, startDate, endDate) => {
   const start = new Date(`${startDate.getUTCFullYear()}-01-01T00:00:00.000Z`);
   const end = new Date(`${endDate.getUTCFullYear() + 1}-01-01T00:00:00.000Z`);
+  const placeHolder = simulationIds.map((_, i) => `$${i + 4}`).join(',');
   const query = `
-  SELECT cntx, minx, maxx, sumx
-  FROM sd_yrain JOIN m_year ON sd_yrain.yearid = m_year.id
+  SELECT cntx, minx, maxx, sumx, simulationid, m_simulation.name AS simulationname
+  FROM sd_yrain
+    JOIN m_simulation ON sd_yrain.simulationid = m_simulation.id
+    JOIN m_year ON sd_yrain.yearid = m_year.id
   WHERE sd_yrain.cellid = $1
     AND $2 <= m_year.start_date
     AND m_year.start_date < $3
-    AND simulationid = $4
-  ORDER BY m_year.start_date
+    AND simulationid IN (${placeHolder})
+  ORDER BY simulationid, m_year.start_date
   `;
-  return pool.query(query, [cellId, start, end, simulationId])
+  return pool.query(query, [cellId, start, end, ...simulationIds])
     .then(res => res.rows)
     .catch(e => console.error(e.stack));
 };
