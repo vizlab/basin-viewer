@@ -1,5 +1,17 @@
 import {AbstractHighChart} from './abstract-highcharts';
 
+const groupBy = (items, keyfunc) => {
+  const groups = new Map();
+  for (const item of items) {
+    const key = keyfunc(item);
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key).push(item);
+  }
+  return groups;
+};
+
 class BasicHistogram extends AbstractHighChart {
   static get observedAttributes () {
     return [
@@ -38,27 +50,28 @@ class BasicHistogram extends AbstractHighChart {
 
   load (data, options) {
     const bins = options.bins;
-    const max = Math.max.apply(null, data.ensembles.map(ensemble => {
-      return Math.max.apply(null, ensemble.data);
+    const max = Math.max(...data.ensembles.map(ensemble => {
+      return Math.max(...ensemble.data);
     }));
-    const min = Math.min.apply(null, data.ensembles.map(ensemble => {
-      return Math.min.apply(null, ensemble.data);
+    const min = Math.min(...data.ensembles.map(ensemble => {
+      return Math.min(...ensemble.data);
     }));
 
     const h = (max - min) / bins;
-    const histograms = data.ensembles.map(ensemble => {
-      return [...Array(bins).keys()].map(idx => {
-        const range = [h * idx, h * (idx + 1)];
-        return [h * idx, ensemble.data.filter(d => (d > range[0]) && (d < range[1])).length ];
-      });
-    });
-
-    this.options.series = [];
-    histograms.forEach((histogram, idx) => {
-      this.options.series.push({
-        name: data.ensembles[idx].name,
-        data: histogram
-      });
+    const models = groupBy(data.ensembles, ensemble => ensemble.name.split('/')[1]);
+    this.options.series = Array.from(models.entries()).map(([key, ensembles]) => {
+      return {
+        name: key,
+        data: [...Array(bins).keys()].map(idx => {
+          const start = h * idx + min;
+          const end = h * (idx + 1) + min;
+          let count = 0;
+          for (const ensemble of ensembles) {
+            count += ensemble.data.filter(d => start <= d && d < end).length;
+          }
+          return [start, count];
+        })
+      };
     });
 
     this.render();

@@ -258,10 +258,11 @@ exports.getEvents = (experimentId, cellId, startDateId, endDateId, days) => {
   const query = `
   SELECT
     start_date,
+    simulationid AS simulation_id,
     name AS simulation_name,
     total AS three_day_rain
   FROM (
-      SELECT dateid, name, (SUM(sumx / cntx * 24) OVER (PARTITION BY simulationid ORDER BY dateid ROWS BETWEEN 0 PRECEDING AND $5 FOLLOWING)) AS total
+      SELECT dateid, simulationid, name, (SUM(sumx / cntx * 24) OVER (PARTITION BY simulationid ORDER BY dateid ROWS BETWEEN 0 PRECEDING AND $5 FOLLOWING)) AS total
       FROM (SELECT * FROM sd_drain WHERE cellid = $2 AND dateid BETWEEN $3 AND $4) AS sd_drain
         JOIN m_simulation ON sd_drain.simulationid = m_simulation.id AND experimentid = $1
       ORDER BY total DESC
