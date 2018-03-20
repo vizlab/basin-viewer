@@ -8,11 +8,12 @@
 
 <script>
 import Vue from 'vue';
+import _ from 'lodash';
 
 const fetchHistogramData = (cellId, simulationIds, start, end) => {
   const params = new URLSearchParams();
   params.set('cellId', cellId);
-  params.set('simulationIds', simulationIds.join(','));
+  params.set('simulationIds', _.values(_.omitBy(simulationIds, _.isEmpty)).join());
   params.set('startDate', start);
   params.set('endDate', end);
   params.set('range', 'year');
