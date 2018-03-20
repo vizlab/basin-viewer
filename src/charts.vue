@@ -42,5 +42,6 @@ export default Vue.extend({
   top: 50%
   width: 100%
   height: 50vh
+  overflow-x: hidden;
   overflow-y: scroll;
 </style>

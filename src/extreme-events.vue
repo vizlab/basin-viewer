@@ -9,7 +9,7 @@
             select(v-model="selectedEventType")
               option(v-for="eventType in eventTypes", :value="eventType") {{ eventType }}
           span &nbsp;
-          button.button(@click="showEventList") {{ $t("buttons.show_event_list") }}
+          button.button(@click="showEventList", :class="{'is-loading': loading}") {{ $t("buttons.show_event_list") }}
       .events
         table.table.is-hoverable.is-fullwidth
           thead: tr
@@ -22,6 +22,7 @@
               td.three-day-rain {{ event.three_day_rain | fixFloatingDecimal }}
               td.simulation-name {{ event.simulation_name }}
     .column
+      a.button(ref="download", @click="download", :disabled="data == null") Download as CSV
       viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall")
 </template>
 
@@ -65,6 +66,8 @@ export default Vue.extend({
     truncateDate: v => v.slice(0, 10).replace(/-/g, '/')
   },
   data: () => ({
+    loading: false,
+    data: null,
     events: [],
     eventTypes: [
       'cumulative rainfall (3 days)'
@@ -78,9 +81,11 @@ export default Vue.extend({
   },
   methods: {
     showEventList() {
+      this.loading = true;
       fetchEvents(this.cellId, this.experimentId, this.start, this.end)
         .then(events => {
           this.events = events;
+          this.loading = false;
         });
     },
     showHourlyRain(e, event) {
@@ -89,8 +94,18 @@ export default Vue.extend({
       const end = new Date(t + (3 * 24 * 60 * 60 * 1000));
       fetchData(this.cellId, event.simulation_id, start, end)
         .then(data => {
+          this.data = data;
           this.$refs.lineChart.load(data);
         });
+    },
+    download() {
+      const head = 'datetime,amount';
+      const content = this.data.ensembles[0].data.map((v, i) => {
+        return [this.data.labels[i], v];
+      }).join('\n');
+      const data = btoa(encodeURIComponent(`${head}\n${content}`).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(`0x${p1}`)));
+      this.$refs.download.href = `data:text/csv;base64,${data}`;
+      this.$refs.download.download = 'data.csv';
     }
   }
 });

@@ -2,6 +2,7 @@
 #histogram
   .columns
     .column
+      a.button(ref="download", @click="download", :disabled="data == null") Download as CSV
       viz-basic-histogram(ref="histogram", y-axis-title="rainfall")
 </template>
 
@@ -29,6 +30,9 @@ const fetchHistogramData = (cellId, simulationIds, start, end) => {
 
 export default Vue.extend({
   props: ['cellId', 'simulationIds', 'start', 'end'],
+  data: () => ({
+    data: null
+  }),
   watch: {
     cellId() {
       this.render();
@@ -41,14 +45,23 @@ export default Vue.extend({
       }
       fetchHistogramData(this.cellId, this.simulationIds, this.start, this.end)
         .then(data => {
+          this.data = data;
           this.$refs.histogram.load(data, { bins: 50 });
         });
+    },
+    download() {
+      const head = 'simulation,year,amount';
+      const content = this.data.ensembles.map(ensemble => {
+        return ensemble.data.map((v, i) => {
+          return [ensemble.name, this.data.labels[i].substr(0, 4), v];
+        }).join('\n');
+      }).join('\n');
+      const data = btoa(encodeURIComponent(`${head}\n${content}`).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode(`0x${p1}`)));
+      this.$refs.download.href = `data:text/csv;base64,${data}`;
+      this.$refs.download.download = 'data.csv';
     }
   },
   mounted() {
-    this.render();
-  },
-  updated() {
     this.render();
   }
 });
