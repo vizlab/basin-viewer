@@ -31,8 +31,8 @@
       .field-body: .field.is-narrow: .control
         .columns.is-multiline
           .column.is-4(v-for="(simulations, model) in simulationColumns")
-            a.button.is-small.is-text(v-if="Object.keys(simulationColumns).length > 1", @click="toggleModel(model, $event)")
-              small {{ model }}<br>
+            .toggle: a.is-text(v-if="Object.keys(simulationColumns).length > 1", @click="toggleModel(model, $event)")
+              small {{ model }}
             .select.is-multiple.is-small
               select(v-model="selectedSimulationIds[model]", multiple)
                 option(v-for="simulation in simulations", :value="simulation.id")
