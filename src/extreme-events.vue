@@ -43,6 +43,7 @@ const fetchData = (cellId, simulationId, start, end) => {
   const params = new URLSearchParams();
   params.set('cellId', cellId);
   params.set('simulationIds', simulationId);
+  // params.set('simulationIds', _.values(_.omitBy(simulationId, _.isEmpty)).join());
   params.set('startDate', start);
   params.set('endDate', end);
   params.set('range', 'hour');
