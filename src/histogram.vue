@@ -37,6 +37,9 @@ export default Vue.extend({
   watch: {
     cellId() {
       this.render();
+    },
+    simulationIds() {
+      this.render();
     }
   },
   methods: {

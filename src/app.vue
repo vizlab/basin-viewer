@@ -43,7 +43,7 @@
       .polygons(v-for="multiPolygon in cell.geometry.coordinates")
         .polygon(v-for="polygon in multiPolygon" )
           v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: polygonWeight(cell)}', @l-click="handleClickPolygon($event, cell)")
-  charts(:cellId="selectedCellId", :experimentId="selectedExperimentId", :simulationIds="selectedSimulationIds", :start="start", :end="end")
+  charts(:cellId="selectedCellId", :simulationIds="selectedSimulationIds", :start="start", :end="end")
 </template>
 
 <script>
@@ -93,6 +93,7 @@ export default {
       } else {
         this.selectedSimulationIds[model] = this.simulationColumns[model].map(s => s.id);
       }
+      this.selectedSimulationIds = Object.assign({}, this.selectedSimulationIds);
     },
     polygonColor(cell) {
       if (cell.max == null) {

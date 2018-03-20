@@ -127,10 +127,11 @@ app.get('/yearly-rains', async (req, res) => {
 });
 
 app.get('/events', async (req, res) => {
-  const {experimentId, cellId} = req.query;
+  const {cellId, days} = req.query;
+  const simulationIds = req.query.simulationIds.split(',').map(id => +id);
   const start = await getDate(ensureUTC(new Date(req.query.startDate)));
   const end = await getDate(ensureUTC(new Date(req.query.endDate)));
-  const events = await getEvents(experimentId, cellId, start.id, end.id, 3);
+  const events = await getEvents(simulationIds, cellId, start.id, end.id, days);
   res.json({events});
 });
 

@@ -257,7 +257,8 @@ exports.getYearlyRains = (simulationIds, cellId, startDate, endDate) => {
     .catch(e => console.error(e.stack));
 };
 
-exports.getEvents = (experimentId, cellId, startDateId, endDateId, days) => {
+exports.getEvents = (simulationIds, cellId, startDateId, endDateId, days) => {
+  const placeHolder = simulationIds.map((_, i) => `$${i + 5}`).join(',');
   const query = `
   SELECT
     start_date,
@@ -265,15 +266,15 @@ exports.getEvents = (experimentId, cellId, startDateId, endDateId, days) => {
     name AS simulation_name,
     total AS three_day_rain
   FROM (
-      SELECT dateid, simulationid, name, (SUM(sumx / cntx * 24) OVER (PARTITION BY simulationid ORDER BY dateid ROWS BETWEEN 0 PRECEDING AND $5 FOLLOWING)) AS total
-      FROM (SELECT * FROM sd_drain WHERE cellid = $2 AND dateid BETWEEN $3 AND $4) AS sd_drain
-        JOIN m_simulation ON sd_drain.simulationid = m_simulation.id AND experimentid = $1
+      SELECT dateid, simulationid, name, (SUM(sumx / cntx * 24) OVER (PARTITION BY simulationid ORDER BY dateid ROWS BETWEEN 0 PRECEDING AND $4 FOLLOWING)) AS total
+      FROM (SELECT * FROM sd_drain WHERE cellid = $1 AND dateid BETWEEN $2 AND $3) AS sd_drain
+        JOIN m_simulation ON sd_drain.simulationid = m_simulation.id AND simulationid IN (${placeHolder})
       ORDER BY total DESC
       LIMIT 10
     ) AS ret
     JOIN m_date ON ret.dateid = m_date.id;
   `;
-  return pool.query(query, [experimentId, cellId, startDateId, endDateId, days - 1])
+  return pool.query(query, [cellId, startDateId, endDateId, days - 1, ...simulationIds])
     .then(res => res.rows)
     .catch(e => console.error(e.stack));
 };

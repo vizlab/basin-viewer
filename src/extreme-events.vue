@@ -28,13 +28,15 @@
 
 <script>
 import Vue from 'vue';
+import _ from 'lodash';
 
-const fetchEvents = (cellId, experimentId, start, end) => {
+const fetchEvents = (cellId, simulationIds, start, end) => {
   const params = new URLSearchParams();
-  params.set('experimentId', experimentId);
   params.set('cellId', cellId);
+  params.set('simulationIds', _.values(_.omitBy(simulationIds, _.isEmpty)).join());
   params.set('startDate', start);
   params.set('endDate', end);
+  params.set('days', 3);
   return fetch(`/events?${params.toString()}`)
     .then(res => res.json())
     .then(data => data.events);
@@ -44,7 +46,6 @@ const fetchData = (cellId, simulationId, start, end) => {
   const params = new URLSearchParams();
   params.set('cellId', cellId);
   params.set('simulationIds', simulationId);
-  // params.set('simulationIds', _.values(_.omitBy(simulationId, _.isEmpty)).join());
   params.set('startDate', start);
   params.set('endDate', end);
   params.set('range', 'hour');
@@ -61,7 +62,7 @@ const fetchData = (cellId, simulationId, start, end) => {
 };
 
 export default Vue.extend({
-  props: ['cellId', 'experimentId', 'start', 'end'],
+  props: ['cellId', 'simulationIds', 'start', 'end'],
   filters: {
     fixFloatingDecimal: v => v.toFixed(4),
     truncateDate: v => v.slice(0, 10).replace(/-/g, '/')
@@ -83,7 +84,7 @@ export default Vue.extend({
   methods: {
     showEventList() {
       this.loading = true;
-      fetchEvents(this.cellId, this.experimentId, this.start, this.end)
+      fetchEvents(this.cellId, this.simulationIds, this.start, this.end)
         .then(events => {
           this.events = events;
           this.loading = false;

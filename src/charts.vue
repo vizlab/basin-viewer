@@ -6,7 +6,7 @@
         a(@click="changeTab($event, tab)") {{ tab }}
   .content
     histogram(v-if="selectedTab === 'histogram'", :cellId="cellId", :simulationIds="simulationIds", :start="start", :end="end")
-    extremeEvents(v-if="selectedTab === 'extreme-events'", :cellId="cellId", :experimentId="experimentId", :start="start", :end="end")
+    extremeEvents(v-if="selectedTab === 'extreme-events'", :cellId="cellId", :simulationIds="simulationIds", :start="start", :end="end")
 </template>
 
 <script>
@@ -19,7 +19,7 @@ export default Vue.extend({
     histogram: Histogram,
     extremeEvents: ExtremeEvents
   },
-  props: ['cellId', 'experimentId', 'simulationIds', 'start', 'end'],
+  props: ['cellId', 'simulationIds', 'start', 'end'],
   data: () => ({
     tabs: [
       'histogram',
