@@ -5,6 +5,12 @@
       a.button.is-text(:class="{'is-active': $i18n.locale === 'ja'}", @click="$i18n.locale = 'ja'") 日本語
       a.button.is-text(:class="{'is-active': $i18n.locale === 'en'}", @click="$i18n.locale = 'en'") English
     .field.is-horizontal
+      .field-label.is-normal: label.label {{ $t("labels.map_type") }}
+      .field-body: .field.is-narrow: .control: .select
+        select(v-model="map")
+          option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") {{ $t("options.ordinary") }}
+          option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") {{ $t("options.hydda") }}
+    .field.is-horizontal
       .field-label.is-normal: label.label {{ $t("labels.cell_type") }}
       .field-body: .field.is-narrow: .control: .select
         select(v-model="selectedCellType")
@@ -22,15 +28,15 @@
           option(v-for="experiment in experiments", :value="experiment.id") {{ experiment.nameenglish }}
     .field.is-horizontal
       .field-label.is-normal: label.label {{ $t("labels.simulations") }}
-      .field-body: .field.is-narrow: .control: .select.is-multiple
-        select(v-model="selectedSimulationIds" multiple)
-          option(v-for="simulation in simulations", :value="simulation.id") {{ simulation.name }}
-    .field.is-horizontal
-      .field-label.is-normal: label.label {{ $t("labels.map_type") }}
-      .field-body: .field.is-narrow: .control: .select
-        select(v-model="map")
-          option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") {{ $t("options.ordinary") }}
-          option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") {{ $t("options.hydda") }}
+      .field-body: .field.is-narrow: .control
+        .columns.is-multiline
+          .column.is-4(v-for="(simulations, model) in simulationColumns")
+            a.button.is-small.is-text(v-if="Object.keys(simulationColumns).length > 1", @click="toggleModel(model, $event)")
+              small {{ model }}<br>
+            .select.is-multiple.is-small
+              select(v-model="selectedSimulationIds[model]", multiple)
+                option(v-for="simulation in simulations", :value="simulation.id")
+                  span {{ simulation.name.split('/').slice(1).join('/') }}
   v-map(:zoom=6, :center="[35.4233, 136.7607]")
     v-tilelayer(:url="map")
     .loop(v-for="cell in cells")
@@ -45,6 +51,7 @@ import Datepicker from 'vuejs-datepicker';
 import Charts from './charts.vue';
 import {scaleLinear} from 'd3-scale';
 import {extent} from 'd3-array';
+import _ from 'lodash';
 
 export default {
   components: {
@@ -60,6 +67,11 @@ export default {
         this.selectedExperimentId = data[0].id;
       });
   },
+  computed: {
+    simulationColumns() {
+      return _.groupBy(this.simulations, s => s.model);
+    }
+  },
   data: () => ({
     cellColorScale: scaleLinear().range(['#aaaaff', '#0000ff']),
     selectedCellType: null,
@@ -68,13 +80,20 @@ export default {
     experiments: [],
     selectedExperimentId: null,
     simulations: [],
-    selectedSimulationIds: [],
+    selectedSimulationIds: {},
     map: 'http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png',
     start: new Date('2050/09/01'),
     end: new Date('2050/09/30'),
     waiting: false,
   }),
   methods: {
+    toggleModel(model, e) {
+      if(this.selectedSimulationIds[model].length > 0) {
+        this.selectedSimulationIds[model] = [];
+      } else {
+        this.selectedSimulationIds[model] = this.simulationColumns[model].map(s => s.id);
+      }
+    },
     polygonColor(cell) {
       if (cell.max == null) {
         return '#888888';
@@ -105,7 +124,7 @@ export default {
         .then(res => res.json())
         .then(data => {
           this.simulations = data;
-          this.selectedSimulationIds = data.map(d => d.id);
+          this.selectedSimulationIds = _.mapValues(this.simulationColumns, v => v.map(s => s.id)); // select all
         });
     },
     selectedCellType (val) {
@@ -150,6 +169,8 @@ html, body, #app
     padding: 0 10px
   .tilda
     vertical-align: -10px
+  .field
+    width: 100%
 .vue2leaflet-map.leaflet-container
   float: right
   cursor: crosshair
