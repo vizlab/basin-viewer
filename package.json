@@ -2,11 +2,12 @@
   "name": "basin-viewer",
   "description": "SI-CAT project",
   "version": "1.0.0",
-  "author": "Takao NAITO <xarsh@outlook.com>",
   "contributors": [
+    "Takao NAITO <xarsh@outlook.com>",
     "Yosuke Onoue <onoue@likr-lab.com>",
     "Shinsuke Imai <imaishinsuke@gmail.com>"
   ],
+  "license": "MIT",
   "private": true,
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
