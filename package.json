@@ -14,6 +14,7 @@
     "lint": "eslint src/*.{js,vue}",
     "start": "nodemon server.js",
     "dev": "nodemon server-mock.js",
+    "proxy": "cloud_sql_proxy -instances=vizlab-crest:asia-northeast1:sicat-d4pdf=tcp:5432",
     "watch": "webpack -w"
   },
   "dependencies": {
