@@ -108,7 +108,7 @@ exports.getSimulations = experimentId => {
     SELECT *
     FROM m_simulation
     WHERE experimentid = $1
-    ORDER BY model, ensembleno
+    ORDER BY modelname, ensembleno
   `;
   return pool.query(query, [experimentId])
     .then(res => res.rows)
