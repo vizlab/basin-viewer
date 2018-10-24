@@ -11,7 +11,7 @@ import './charts/basic-error-bar-chart';
 Vue.use(VueI18n);
 
 const i18n = new VueI18n({
-  locale: 'en',
+  locale: 'ja',
   messages: require('./texts.json')
 });
 

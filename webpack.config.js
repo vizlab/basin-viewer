@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   entry: './src/main.js',
@@ -26,6 +27,18 @@ module.exports = {
     noInfo: true
   },
   performance: {hints: false},
+  plugins: [
+    new CopyWebpackPlugin([
+      {
+        from: './node_modules/leaflet/dist/leaflet.css',
+        to: 'vendor'
+      },
+      {
+        from: './node_modules/bulma/css/bulma.min.css',
+        to: 'vendor'
+      }
+    ])
+  ],
   devtool: '#inline-source-map'
 };
 

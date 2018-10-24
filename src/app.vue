@@ -1,9 +1,17 @@
 <template lang="pug">
 #app(:class="{waiting: waiting}")
+  nav.navbar.is-primary
+    .navbar-brand
+      a.navbar-item
+        h1 SEAL-V
+    .navbar-menu
+      .navbar-end
+        .navbar-item.has-dropdown.is-hoverable
+          a.navbar-link 言語
+          .navbar-dropdown
+            a.navbar-item(:class="{'is-active': $i18n.locale === 'ja'}", @click="$i18n.locale = 'ja'") 日本語
+            a.navbar-item(:class="{'is-active': $i18n.locale === 'en'}", @click="$i18n.locale = 'en'") English
   #controller
-    .language-selector.buttons.has-addons
-      a.button.is-text(:class="{'is-active': $i18n.locale === 'ja'}", @click="$i18n.locale = 'ja'") 日本語
-      a.button.is-text(:class="{'is-active': $i18n.locale === 'en'}", @click="$i18n.locale = 'en'") English
     .field.is-horizontal
       .field-label.is-normal: label.label {{ $t("labels.map_type") }}
       .field-body: .field.is-narrow: .control: .select
@@ -152,6 +160,8 @@ html, body, #app
 .vue2leaflet-map.leaflet-container, #controller
   width: 50%
   height: 50vh
+.navbar
+  z-index: 1000
 #controller
   overflow-y: scroll
   float: left
