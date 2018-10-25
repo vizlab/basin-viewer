@@ -18,8 +18,7 @@
     "axes": {
       "precipitation": "Precipitation",
       "frequency": "Frequency",
-      "date": "Date",
-      "cumulative_precipitation": "Cumulative precipitation [mm]"
+      "date": "Date"
     },
     "tabs": {
       "histogram": "Histogram",
@@ -72,10 +71,9 @@
       "3day_cumulative_precipitation": "3日間積算降水量"
     },
     "axes": {
-      "precipitation": "Precipitation",
-      "frequency": "Frequency",
-      "date": "Date",
-      "cumulative_precipitation": "Cumulative precipitation [mm]"
+      "precipitation": "降水量",
+      "frequency": "頻度",
+      "date": "日時"
     },
     "tabs": {
       "histogram": "ヒストグラム",
