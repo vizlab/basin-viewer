@@ -6,7 +6,7 @@
     .navbar-menu
       .navbar-end
         .navbar-item.has-dropdown.is-hoverable
-          a.navbar-link 言語
+          a.navbar-link {{ $t("buttons.language") }}
           .navbar-dropdown
             a.navbar-item(:class="{'is-active': $i18n.locale === 'ja'}", @click="$i18n.locale = 'ja'") 日本語
             a.navbar-item(:class="{'is-active': $i18n.locale === 'en'}", @click="$i18n.locale = 'en'") English
@@ -20,19 +20,19 @@
               option(value="1") {{ $t("options.prefecture") }}
               option(value="2") {{ $t("options.basin") }}
       .field
-        label.label.is-small Cell
+        label.label.is-small {{ $t("labels.cell") }}
         .control
           .select.is-fullwidth
             select(v-model="selectedCellId")
               option(v-for="cell in cells", :value="cell.id") {{ cell.name }}
       .field
-        label.label.is-small {{ $t("labels.experiment") }}
+        label.label.is-small {{ $t("labels.simulations") }}
         .control
           .select.is-fullwidth
             select(v-model="selectedExperimentId")
-              option(v-for="experiment in experiments", :value="experiment.id") {{ experiment.nameenglish }}
+              option(v-for="experiment in experiments", :value="experiment.id") {{ $i18n.locale === 'ja' ? experiment.namejapanese : experiment.nameenglish }}
       .field
-        label.label.is-small {{ $t("labels.simulations") }}
+        label.label.is-small {{ $t("labels.ensembles") }}
         .control
           .columns.is-multiline
             .column.is-4(v-for="(simulations, model) in simulationColumns", :key="model")
@@ -46,8 +46,11 @@
         .control
           .select.is-fullwidth
             select(v-model="map")
-              option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") {{ $t("options.ordinary") }}
-              option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") {{ $t("options.hydda") }}
+              option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") OpenStreetMap.Mapnik
+              option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") Hydda.Base
+              option(value="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png") OpenTopoMap
+              option(value="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}") Esri.WorldImagery
+              option(value="http://tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png") MtbMap
   #leaflet-wrapper
     .box
       v-map(:zoom=6, :center="[35.4233, 136.7607]")

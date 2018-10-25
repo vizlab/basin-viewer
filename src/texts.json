@@ -2,13 +2,28 @@
   "en": {
     "labels": {
       "cell_type": "Cell Type",
-      "experiment": "Experiment",
+      "cell": "Cell",
       "simulations": "Simulations",
+      "ensembles": "Ensembles",
       "period": "Period",
       "range": "Range",
       "measure": "Measure",
-      "map_type": "Map Type",
+      "event_type": "Event Type",
+      "map_type": "Map Provider",
       "chart_type": "Chart Type"
+    },
+    "events": {
+      "3day_cumulative_precipitation": "Cumulative precipitation (3 days)"
+    },
+    "axes": {
+      "precipitation": "Precipitation",
+      "frequency": "Frequency",
+      "date": "Date",
+      "cumulative_precipitation": "Cumulative precipitation [mm]"
+    },
+    "tabs": {
+      "histogram": "Histogram",
+      "extreme_events": "Extreme events"
     },
     "options": {
       "prefecture": "Prefecture",
@@ -19,11 +34,11 @@
       "hour": "Hour",
       "avg": "AVG",
       "max": "MAX",
-      "min": "MIN",
-      "hydda": "Hydda",
-      "ordinary": "Ordinary"
+      "min": "MIN"
     },
     "buttons": {
+      "language": "language",
+      "download_data": "Download Data as CSV",
       "show_event_list": "Show event list"
     },
     "graphs": {
@@ -34,22 +49,37 @@
       "error_bar_chart": "Bar Chart"
     },
     "modal": {
-      "desc": "Cumulative rainfall for three days",
+      "desc": "Cumulative precipitation for three days",
       "date": "Date",
-      "rainfall": "Cumulative rainfall [mm]",
+      "precipitation": "Cumulative precipitation [mm]",
       "ensemble": "Ensemble name"
     }
   },
   "ja": {
     "labels": {
       "cell_type": "領域タイプ",
-      "experiment": "実験の種類",
-      "simulations": "アンサンブル選択",
+      "cell": "領域",
+      "simulations": "シミュレーション",
+      "ensembles": "アンサンブル",
       "period": "期間",
       "range": "範囲",
       "measure": "単位",
-      "map_type": "地図の種類",
+      "event_type": "イベントタイプ",
+      "map_type": "地図プロバイダー",
       "chart_type": "グラフの種類"
+    },
+    "events": {
+      "3day_cumulative_precipitation": "3日間積算降水量"
+    },
+    "axes": {
+      "precipitation": "Precipitation",
+      "frequency": "Frequency",
+      "date": "Date",
+      "cumulative_precipitation": "Cumulative precipitation [mm]"
+    },
+    "tabs": {
+      "histogram": "ヒストグラム",
+      "extreme_events": "極端イベント"
     },
     "options": {
       "prefecture": "都道府県",
@@ -60,11 +90,11 @@
       "hour": "時",
       "avg": "平均値",
       "max": "最大値",
-      "min": "最小値",
-      "hydda": "河川",
-      "ordinary": "地域"
+      "min": "最小値"
     },
     "buttons": {
+      "language": "言語",
+      "download_data": "データをCSV形式でダウンロード",
       "show_event_list": "イベントリストを表示"
     },
     "graphs": {
@@ -77,7 +107,7 @@
     "modal": {
       "desc": "三日間積算降水量",
       "date": "日付",
-      "rainfall": "降水量 [mm]",
+      "precipitation": "降水量 [mm]",
       "ensemble": "アンサンブル"
     }
   }

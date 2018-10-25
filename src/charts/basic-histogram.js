@@ -15,6 +15,7 @@ const groupBy = (items, keyfunc) => {
 class BasicHistogram extends AbstractHighChart {
   static get observedAttributes () {
     return [
+      'x-axis-title',
       'y-axis-title'
     ];
   }
@@ -31,9 +32,14 @@ class BasicHistogram extends AbstractHighChart {
       },
       series: [
       ],
+      xAxis: {
+        title: {
+          text: this.xAxisTitle
+        }
+      },
       yAxis: {
         title: {
-          text: ''
+          text: this.yAxisTitle
         }
       },
       plotOptions: {
@@ -46,6 +52,9 @@ class BasicHistogram extends AbstractHighChart {
 
   attributeChangedCallback (attrName, oldVal, newVal) {
     switch (attrName) {
+      case 'x-axis-title':
+        this.options.xAxis.title.text = this.xAxisTitle;
+        break;
       case 'y-axis-title':
         this.options.yAxis.title.text = this.yAxisTitle;
         break;
@@ -79,6 +88,17 @@ class BasicHistogram extends AbstractHighChart {
     });
 
     this.render();
+  }
+
+  get xAxisTitle () {
+    if (this.hasAttribute('x-axis-title')) {
+      return this.getAttribute('x-axis-title');
+    }
+    return '';
+  }
+
+  set xAxisTitle (value) {
+    this.setAttribute('x-axis-title', value);
   }
 
   get yAxisTitle () {

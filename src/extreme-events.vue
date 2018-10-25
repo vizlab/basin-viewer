@@ -1,31 +1,33 @@
 <template lang="pug">
 #extreme-events
   .columns
-    .column
+    .column.is-full
       .field
-        label.label.is-small Event Type
+        label.label.is-small {{ $t("labels.event_type") }}
         .control
           .select
             select(v-model="selectedEventType")
-              option(v-for="eventType in eventTypes", :value="eventType") {{ eventType }}
+              option(v-for="eventType in eventTypes", :value="eventType") {{ $t(`events.${eventType}`) }}
           span &nbsp;
           button.button(@click="showEventList", :class="{'is-loading': loading}") {{ $t("buttons.show_event_list") }}
   .columns
-    .column
+    .column.is-half
       .events
         table.table.is-hoverable.is-fullwidth
           thead: tr
             td.date {{ $t("modal.date") }}
-            td.three-day-rain {{ $t("modal.rainfall") }}
+            td.three-day-rain {{ $t("modal.precipitation") }}
             td.simulation-name {{ $t("modal.ensemble") }}
           tbody
             tr(v-for="event in events", @click="showHourlyRain($event, event)")
               th.date {{ event.start_date | truncateDate }}
               td.three-day-rain {{ event.three_day_rain | fixFloatingDecimal }}
               td.simulation-name {{ event.simulation_name }}
-    .column
-      a.button.is-small(ref="download", @click="download", :disabled="data == null") Download as CSV
-      viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall")
+    .column.is-half
+      .field
+        .control
+          a.button.is-small(ref="download", @click="download", :disabled="data == null") {{ $t("buttons.download_data") }}
+      viz-basic-line-chart(ref="lineChart", :x-axis-title="$t('axes.date')" :y-axis-title="$t('axes.precipitation')")
 </template>
 
 <script>
@@ -74,9 +76,9 @@ export default Vue.extend({
     data: null,
     events: [],
     eventTypes: [
-      'cumulative rainfall (3 days)'
+      '3day_cumulative_precipitation'
     ],
-    selectedEventType: 'cumulative rainfall (3 days)'
+    selectedEventType: '3day_cumulative_precipitation'
   }),
   watch: {
     cellId() {

@@ -3,10 +3,10 @@
   .tabs.is-small
     ul
       li(v-for="tab in tabs", :class="{ 'is-active': tab === selectedTab }")
-        a(@click="changeTab($event, tab)") {{ tab }}
+        a(@click="changeTab($event, tab)") {{ $t(`tabs.${tab}`) }}
   .tab-content
     histogram(v-if="selectedTab === 'histogram'", :cellId="cellId", :simulationIds="simulationIds", :start="start", :end="end")
-    extremeEvents(v-if="selectedTab === 'extreme-events'", :cellId="cellId", :simulationIds="simulationIds", :start="start", :end="end")
+    extremeEvents(v-if="selectedTab === 'extreme_events'", :cellId="cellId", :simulationIds="simulationIds", :start="start", :end="end")
 </template>
 
 <script>
@@ -23,7 +23,7 @@ export default Vue.extend({
   data: () => ({
     tabs: [
       'histogram',
-      'extreme-events'
+      'extreme_events'
     ],
     selectedTab: 'histogram'
   }),

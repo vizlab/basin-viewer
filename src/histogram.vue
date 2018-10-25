@@ -1,9 +1,11 @@
 <template lang="pug">
 #histogram
   .columns
-    .column
-      a.button.is-small(ref="download", @click="download", :disabled="data == null") Download as CSV
-      viz-basic-histogram(ref="histogram", y-axis-title="rainfall")
+    .column.is-full
+      .field
+        .control
+          a.button.is-small(ref="download", @click="download", :disabled="data == null") {{ $t("buttons.download_data") }}
+      viz-basic-histogram(ref="histogram",  :x-axis-title="$t('axes.precipitation')", :y-axis-title="$t('axes.frequency')")
 </template>
 
 <script>
@@ -72,6 +74,4 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
-.column
-  width: 100%
 </style>

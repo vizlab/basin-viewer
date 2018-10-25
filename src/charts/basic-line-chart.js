@@ -3,6 +3,7 @@ import {AbstractHighChart} from './abstract-highcharts';
 class BasicLineChart extends AbstractHighChart {
   static get observedAttributes () {
     return [
+      'x-axis-title',
       'y-axis-title'
     ];
   }
@@ -17,6 +18,9 @@ class BasicLineChart extends AbstractHighChart {
       chart: {
       },
       xAxis: {
+        title: {
+          text: this.xAxisTitle
+        },
         categories: [],
         tickInterval: 48
       },
@@ -31,6 +35,9 @@ class BasicLineChart extends AbstractHighChart {
 
   attributeChangedCallback (attrName, oldVal, newVal) {
     switch (attrName) {
+      case 'x-axis-title':
+        this.options.xAxis.title.text = this.xAxisTitle;
+        break;
       case 'y-axis-title':
         this.options.yAxis.title.text = this.yAxisTitle;
         break;
@@ -41,6 +48,17 @@ class BasicLineChart extends AbstractHighChart {
     this.options.xAxis.categories = data.labels;
     this.options.series = data.ensembles;
     this.render();
+  }
+
+  get xAxisTitle () {
+    if (this.hasAttribute('x-axis-title')) {
+      return this.getAttribute('x-axis-title');
+    }
+    return '';
+  }
+
+  set xAxisTitle (value) {
+    this.setAttribute('x-axis-title', value);
   }
 
   get yAxisTitle () {

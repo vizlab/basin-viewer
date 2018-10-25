@@ -46,11 +46,11 @@ app.get('/simulations', async (req, res) => {
 app.get('/cells', async (req, res) => {
   const {cellType, limit} = req.query;
   const cells = await getCellsWithTotalRain(cellType, limit);
-  res.json(cells.map(({id, codename, geog, cntx, minx, maxx, sumx}) => {
+  res.json(cells.map(({id, name, geog, cntx, minx, maxx, sumx}) => {
     const buffer = new Buffer(geog, 'hex');
     return {
       id,
-      name: codename, // TODO use name
+      name: name,
       avg: sumx / cntx,
       max: maxx,
       min: minx,
