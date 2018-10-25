@@ -176,9 +176,9 @@ html, body, #app
 #controller-wrapper
   position: absolute
   top: 52px
+  bottom: 50%
   left: 0
   width: 50%
-  height: calc(50vh - 52px)
   padding: 10px
   .box
     height: 100%
