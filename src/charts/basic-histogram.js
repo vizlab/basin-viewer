@@ -24,8 +24,7 @@ class BasicHistogram extends AbstractHighChart {
 
     this.options = {
       chart: {
-        type: 'column',
-        zoomType: 'x'
+        type: 'column'
       },
       title: {
         text: ''

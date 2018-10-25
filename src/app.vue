@@ -1,9 +1,8 @@
 <template lang="pug">
 #app(:class="{waiting: waiting}")
-  nav.navbar.is-primary
+  nav.navbar.is-primary#navbar
     .navbar-brand
-      a.navbar-item
-        h1 SEAL-V
+      h1.navbar-item SEAL-V
     .navbar-menu
       .navbar-end
         .navbar-item.has-dropdown.is-hoverable
@@ -11,47 +10,55 @@
           .navbar-dropdown
             a.navbar-item(:class="{'is-active': $i18n.locale === 'ja'}", @click="$i18n.locale = 'ja'") 日本語
             a.navbar-item(:class="{'is-active': $i18n.locale === 'en'}", @click="$i18n.locale = 'en'") English
-  #controller
-    .field.is-horizontal
-      .field-label.is-normal: label.label {{ $t("labels.map_type") }}
-      .field-body: .field.is-narrow: .control: .select
-        select(v-model="map")
-          option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") {{ $t("options.ordinary") }}
-          option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") {{ $t("options.hydda") }}
-    .field.is-horizontal
-      .field-label.is-normal: label.label {{ $t("labels.cell_type") }}
-      .field-body: .field.is-narrow: .control: .select
-        select(v-model="selectedCellType")
-          option(value="1") {{ $t("options.prefecture") }}
-          option(value="2") {{ $t("options.basin") }}
-    .field.is-horizontal
-      .field-label.is-normal: label.label Cell
-      .field-body: .field.is-narrow: .control: .select
-        select(v-model="selectedCellId")
-          option(v-for="cell in cells", :value="cell.id") {{ cell.name }}
-    .field.is-horizontal
-      .field-label.is-normal: label.label {{ $t("labels.experiment") }}
-      .field-body: .field.is-narrow: .control: .select
-        select(v-model="selectedExperimentId")
-          option(v-for="experiment in experiments", :value="experiment.id") {{ experiment.nameenglish }}
-    .field.is-horizontal
-      .field-label.is-normal: label.label {{ $t("labels.simulations") }}
-      .field-body: .field.is-narrow: .control
-        .columns.is-multiline
-          .column.is-4(v-for="(simulations, model) in simulationColumns")
-            .toggle: a.is-text(v-if="Object.keys(simulationColumns).length > 1", @click="toggleModel(model, $event)")
-              small {{ model }}
-            .select.is-multiple.is-small
-              select(v-model="selectedSimulationIds[model]", multiple)
-                option(v-for="simulation in simulations", :value="simulation.id")
-                  span {{ simulation.name.split('/').slice(1).join('/') }}
-  v-map(:zoom=6, :center="[35.4233, 136.7607]")
-    v-tilelayer(:url="map")
-    .loop(v-for="cell in cells")
-      .polygons(v-for="multiPolygon in cell.geometry.coordinates")
-        .polygon(v-for="polygon in multiPolygon" )
-          v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: polygonWeight(cell)}', @l-click="handleClickPolygon($event, cell)")
-  charts(:cellId="selectedCellId", :simulationIds="selectedSimulationIds", :start="start", :end="end")
+  #controller-wrapper
+    #controller.box
+      .field.is-horizontal
+        .field-label.is-normal: label.label {{ $t("labels.map_type") }}
+        .field-body: .field.is-narrow: .control: .select
+          select(v-model="map")
+            option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") {{ $t("options.ordinary") }}
+            option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") {{ $t("options.hydda") }}
+      .field.is-horizontal
+        .field-label.is-normal: label.label {{ $t("labels.cell_type") }}
+        .field-body: .field.is-narrow: .control: .select
+          select(v-model="selectedCellType")
+            option(value="1") {{ $t("options.prefecture") }}
+            option(value="2") {{ $t("options.basin") }}
+      .field.is-horizontal
+        .field-label.is-normal: label.label Cell
+        .field-body: .field.is-narrow: .control: .select
+          select(v-model="selectedCellId")
+            option(v-for="cell in cells", :value="cell.id") {{ cell.name }}
+      .field.is-horizontal
+        .field-label.is-normal: label.label {{ $t("labels.experiment") }}
+        .field-body: .field.is-narrow: .control: .select
+          select(v-model="selectedExperimentId")
+            option(v-for="experiment in experiments", :value="experiment.id") {{ experiment.nameenglish }}
+      .field.is-horizontal
+        .field-label.is-normal: label.label {{ $t("labels.simulations") }}
+        .field-body: .field.is-narrow: .control
+          .columns.is-multiline
+            .column.is-4(v-for="(simulations, model) in simulationColumns")
+              .toggle: a.is-text(v-if="Object.keys(simulationColumns).length > 1", @click="toggleModel(model, $event)")
+                small {{ model }}
+              .select.is-multiple.is-small
+                select(v-model="selectedSimulationIds[model]", multiple)
+                  option(v-for="simulation in simulations", :value="simulation.id")
+                    span {{ simulation.name.split('/').slice(1).join('/') }}
+  #leaflet-wrapper
+    .box
+      v-map(:zoom=6, :center="[35.4233, 136.7607]")
+        v-tilelayer(:url="map")
+        .loop(v-for="cell in cells")
+          .polygons(v-for="multiPolygon in cell.geometry.coordinates")
+            .polygon(v-for="polygon in multiPolygon" )
+              v-polygon(:latLngs="swapLatLng(polygon)", :lStyle='{color: polygonColor(cell), weight: polygonWeight(cell)}', @l-click="handleClickPolygon($event, cell)")
+  #charts-wrapper
+    .box
+      charts(:cellId="selectedCellId", :simulationIds="selectedSimulationIds", :start="start", :end="end")
+  footer.footer
+    .content.has-text-centered
+      p &copy; 2018 SI-CAT課題1bチーム
 </template>
 
 <script>
@@ -157,23 +164,24 @@ export default {
 html, body, #app
   height: 100%
   margin: 0
-.vue2leaflet-map.leaflet-container, #controller
-  width: 50%
-  height: 50vh
-.navbar
+#navbar
   z-index: 1000
+  background-color: #1f9900
+#controller-wrapper
+  position: absolute
+  top: 52px
+  left: 0
+  width: 50%
+  height: calc(50vh - 52px)
+  padding: 10px
+  .box
+    height: 100%
+    padding: 10px
+    overflow-y: scroll
 #controller
-  overflow-y: scroll
-  float: left
-  padding: 20px
-  position: relative
   dt
     float: left
     margin: 0 10px
-  .language-selector
-    position: absolute
-    top: 10px
-    right: 20px
   .vdp-datepicker
     display: inline-block
   .information
@@ -182,13 +190,37 @@ html, body, #app
     vertical-align: -10px
   .field
     width: 100%
+#leaflet-wrapper
+  padding: 10px
+  position: absolute
+  right: 0
+  top: 52px
+  bottom: 50%
+  width: 50%
+  .box
+    height: 100%
+    padding: 0
 .vue2leaflet-map.leaflet-container
-  float: right
   cursor: crosshair
   .waiting &
     cursor: progress
-#app
-  font-family: 'Avenir', Helvetica, Arial, sans-serif
+#charts-wrapper
+  padding: 10px
+  position: absolute
+  top: 50%
+  bottom: 25px
+  width: 100%
+  .box
+    height: 100%
+    padding: 10px
+    overflow: hidden
+.footer
+  position: absolute
+  bottom: 0
+  width: 100%
+  padding: 0.3rem
+  p
+    font-size: 0.5rem
 .waiting
   cursor: progress
 </style>

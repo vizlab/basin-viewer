@@ -30,7 +30,6 @@ export class AbstractHighChart extends window.HTMLElement {
     window.addEventListener('resize', this.handleResize);
   }
 
-
   disconnectedCallback () {
     this.chart.destroy();
     window.removeEventListener('resize', this.handleResize);

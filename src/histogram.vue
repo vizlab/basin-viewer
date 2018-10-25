@@ -2,7 +2,7 @@
 #histogram
   .columns
     .column
-      a.button(ref="download", @click="download", :disabled="data == null") Download as CSV
+      a.button.is-small(ref="download", @click="download", :disabled="data == null") Download as CSV
       viz-basic-histogram(ref="histogram", y-axis-title="rainfall")
 </template>
 
@@ -72,4 +72,6 @@ export default Vue.extend({
 </script>
 
 <style lang="sass">
+.column
+  width: 100%
 </style>

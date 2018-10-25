@@ -1,10 +1,10 @@
 <template lang="pug">
 #chart
-  .tabs
+  .tabs.is-small
     ul
       li(v-for="tab in tabs", :class="{ 'is-active': tab === selectedTab }")
         a(@click="changeTab($event, tab)") {{ tab }}
-  .content
+  .tab-content
     histogram(v-if="selectedTab === 'histogram'", :cellId="cellId", :simulationIds="simulationIds", :start="start", :end="end")
     extremeEvents(v-if="selectedTab === 'extreme-events'", :cellId="cellId", :simulationIds="simulationIds", :start="start", :end="end")
 </template>
@@ -38,10 +38,11 @@ export default Vue.extend({
 
 <style lang="sass">
 #chart
-  position: fixed
-  top: 50%
-  width: 100%
-  height: 50vh
-  overflow-x: hidden;
-  overflow-y: scroll;
+  height: 100%
+  .tabs
+    margin-bottom: 0.75rem
+.tab-content
+  height: calc(100% - 31px)
+  overflow-x: hidden
+  overflow-y: scroll
 </style>

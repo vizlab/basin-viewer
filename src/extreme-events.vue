@@ -22,7 +22,7 @@
               td.three-day-rain {{ event.three_day_rain | fixFloatingDecimal }}
               td.simulation-name {{ event.simulation_name }}
     .column
-      a.button(ref="download", @click="download", :disabled="data == null") Download as CSV
+      a.button.is-small(ref="download", @click="download", :disabled="data == null") Download as CSV
       viz-basic-line-chart(ref="lineChart", y-axis-title="rainfall")
 </template>
 
