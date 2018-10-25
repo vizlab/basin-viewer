@@ -12,39 +12,42 @@
             a.navbar-item(:class="{'is-active': $i18n.locale === 'en'}", @click="$i18n.locale = 'en'") English
   #controller-wrapper
     #controller.box
-      .field.is-horizontal
-        .field-label.is-normal: label.label {{ $t("labels.map_type") }}
-        .field-body: .field.is-narrow: .control: .select
-          select(v-model="map")
-            option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") {{ $t("options.ordinary") }}
-            option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") {{ $t("options.hydda") }}
-      .field.is-horizontal
-        .field-label.is-normal: label.label {{ $t("labels.cell_type") }}
-        .field-body: .field.is-narrow: .control: .select
-          select(v-model="selectedCellType")
-            option(value="1") {{ $t("options.prefecture") }}
-            option(value="2") {{ $t("options.basin") }}
-      .field.is-horizontal
-        .field-label.is-normal: label.label Cell
-        .field-body: .field.is-narrow: .control: .select
-          select(v-model="selectedCellId")
-            option(v-for="cell in cells", :value="cell.id") {{ cell.name }}
-      .field.is-horizontal
-        .field-label.is-normal: label.label {{ $t("labels.experiment") }}
-        .field-body: .field.is-narrow: .control: .select
-          select(v-model="selectedExperimentId")
-            option(v-for="experiment in experiments", :value="experiment.id") {{ experiment.nameenglish }}
-      .field.is-horizontal
-        .field-label.is-normal: label.label {{ $t("labels.simulations") }}
-        .field-body: .field.is-narrow: .control
+      .field
+        label.label.is-small {{ $t("labels.cell_type") }}
+        .control
+          .select.is-fullwidth
+            select(v-model="selectedCellType")
+              option(value="1") {{ $t("options.prefecture") }}
+              option(value="2") {{ $t("options.basin") }}
+      .field
+        label.label.is-small Cell
+        .control
+          .select.is-fullwidth
+            select(v-model="selectedCellId")
+              option(v-for="cell in cells", :value="cell.id") {{ cell.name }}
+      .field
+        label.label.is-small {{ $t("labels.experiment") }}
+        .control
+          .select.is-fullwidth
+            select(v-model="selectedExperimentId")
+              option(v-for="experiment in experiments", :value="experiment.id") {{ experiment.nameenglish }}
+      .field
+        label.label.is-small {{ $t("labels.simulations") }}
+        .control
           .columns.is-multiline
-            .column.is-4(v-for="(simulations, model) in simulationColumns")
-              .toggle: a.is-text(v-if="Object.keys(simulationColumns).length > 1", @click="toggleModel(model, $event)")
-                small {{ model }}
-              .select.is-multiple.is-small
+            .column.is-4(v-for="(simulations, model) in simulationColumns", :key="model")
+              label.label.is-small.toggle(@click="toggleModel(model, $event)") {{ model }}
+              .select.is-multiple.is-small.is-fullwidth
                 select(v-model="selectedSimulationIds[model]", multiple)
                   option(v-for="simulation in simulations", :value="simulation.id")
                     span {{ simulation.name.split('/').slice(1).join('/') }}
+      .field
+        label.label.is-small {{ $t("labels.map_type") }}
+        .control
+          .select.is-fullwidth
+            select(v-model="map")
+              option(value="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png") {{ $t("options.ordinary") }}
+              option(value="http://{s}.tile.openstreetmap.se/hydda/base/{z}/{x}/{y}.png") {{ $t("options.hydda") }}
   #leaflet-wrapper
     .box
       v-map(:zoom=6, :center="[35.4233, 136.7607]")
@@ -177,19 +180,11 @@ html, body, #app
   .box
     height: 100%
     padding: 10px
+    overflow-x: hidden
     overflow-y: scroll
 #controller
-  dt
-    float: left
-    margin: 0 10px
-  .vdp-datepicker
-    display: inline-block
-  .information
-    padding: 0 10px
-  .tilda
-    vertical-align: -10px
-  .field
-    width: 100%
+  .toggle
+    cursor: pointer
 #leaflet-wrapper
   padding: 10px
   position: absolute

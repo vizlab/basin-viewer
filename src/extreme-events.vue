@@ -2,14 +2,16 @@
 #extreme-events
   .columns
     .column
-      .field.is-horizontal
-        .field-label.is-normal: label.label Event Type
-        .field-body: .field.is-narrow: .control
+      .field
+        label.label.is-small Event Type
+        .control
           .select
             select(v-model="selectedEventType")
               option(v-for="eventType in eventTypes", :value="eventType") {{ eventType }}
           span &nbsp;
           button.button(@click="showEventList", :class="{'is-loading': loading}") {{ $t("buttons.show_event_list") }}
+  .columns
+    .column
       .events
         table.table.is-hoverable.is-fullwidth
           thead: tr
@@ -115,4 +117,3 @@ export default Vue.extend({
 
 <style lang="sass">
 </style>
-

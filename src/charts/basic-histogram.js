@@ -31,6 +31,11 @@ class BasicHistogram extends AbstractHighChart {
       },
       series: [
       ],
+      yAxis: {
+        title: {
+          text: ''
+        }
+      },
       plotOptions: {
         column: {
           stacking: 'normal'
@@ -42,7 +47,7 @@ class BasicHistogram extends AbstractHighChart {
   attributeChangedCallback (attrName, oldVal, newVal) {
     switch (attrName) {
       case 'y-axis-title':
-        // this.options.yAxis[0].title.text = this.yAxisTitle;
+        this.options.yAxis.title.text = this.yAxisTitle;
         break;
     }
   }
