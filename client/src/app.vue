@@ -17,8 +17,7 @@
         .control
           .select.is-fullwidth
             select(v-model="selectedCellType")
-              option(value="1") {{ $t("options.prefecture") }}
-              option(value="2") {{ $t("options.basin") }}
+              option(v-for="cellType in cellTypes", :value="cellType.id") {{ cellType.name }}
       .field
         label.label.is-small {{ $t("labels.cell") }}
         .control
@@ -81,6 +80,12 @@ export default {
   },
   mounted () {
     this.selectedCellType = 1;
+    fetch('api/celltypes')
+      .then(res => res.json())
+      .then(data => {
+        this.cellTypes = data;
+        this.selectedCellType = data[0].id;
+      });
     fetch('api/experiments')
       .then(res => res.json())
       .then(data => {
@@ -90,11 +95,12 @@ export default {
   },
   computed: {
     simulationColumns() {
-      return _.groupBy(this.simulations, s => s.model);
+      return _.groupBy(this.simulations, s => s.modelname);
     }
   },
   data: () => ({
     cellColorScale: scaleLinear().range(['#aaaaff', '#0000ff']),
+    cellTypes: [],
     selectedCellType: null,
     cells: [],
     selectedCellId: null,
@@ -108,6 +114,20 @@ export default {
     waiting: false,
   }),
   methods: {
+    updateCells() {
+      if (this.selectedCellType == null || this.selectedExperimentId == null) {
+        return
+      }
+      const params = new URLSearchParams();
+      params.set('cellType', this.selectedCellType);
+      params.set('experimentId', this.selectedExperimentId);
+      params.set('limit', 200);
+      fetch(`api/cells?${params.toString()}`)
+        .then(res => res.json())
+        .then(data => {
+          this.cells = data;
+        });
+    },
     toggleModel(model, e) {
       if(this.selectedSimulationIds[model].length > 0) {
         this.selectedSimulationIds[model] = [];
@@ -148,16 +168,11 @@ export default {
           this.simulations = data;
           this.selectedSimulationIds = _.mapValues(this.simulationColumns, v => v.map(s => s.id)); // select all
         });
+
+      this.updateCells()
     },
     selectedCellType (val) {
-      const params = new URLSearchParams();
-      params.set('cellType', this.selectedCellType);
-      params.set('limit', 200);
-      fetch(`api/cells?${params.toString()}`)
-        .then(res => res.json())
-        .then(data => {
-          this.cells = data;
-        });
+      this.updateCells()
     },
     cells (val) {
       this.cellColorScale.domain(extent(this.cells, v => v.max));

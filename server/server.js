@@ -6,6 +6,7 @@ const {
   getCell,
   getCellsWithTotalRain,
   getCellByCoordinates,
+  getCellTypes,
   getExperiment,
   getExperiments,
   getSimulation,
@@ -37,8 +38,8 @@ app.get('/simulations', async (req, res) => {
 });
 
 app.get('/cells', async (req, res) => {
-  const {cellType, limit} = req.query;
-  const cells = await getCellsWithTotalRain(cellType, limit);
+  const {cellType, experimentId, limit} = req.query;
+  const cells = await getCellsWithTotalRain(cellType, experimentId, limit);
   res.json(cells.map(({id, name, geog, cntx, minx, maxx, sumx}) => {
     const buffer = new Buffer(geog, 'hex');
     return {
@@ -50,6 +51,11 @@ app.get('/cells', async (req, res) => {
       geometry: wkx.Geometry.parse(buffer).toGeoJSON()
     };
   }));
+});
+
+app.get('/celltypes', async (req, res) => {
+  const cellTypes = await getCellTypes();
+  res.json(cellTypes);
 });
 
 app.get('/rains', async (req, res) => {

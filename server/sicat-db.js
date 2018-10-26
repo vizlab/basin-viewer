@@ -31,7 +31,7 @@ exports.getCells = (cellType, limit) => {
     .catch(e => console.error(e.stack));
 };
 
-exports.getCellsWithTotalRain = (cellType, limit) => {
+exports.getCellsWithTotalRain = (cellType, experimentId, limit) => {
   const query = `
     SELECT *
     FROM (SELECT * FROM m_cell WHERE celltype = $1 LIMIT $2) AS m_cell
@@ -42,11 +42,12 @@ exports.getCellsWithTotalRain = (cellType, limit) => {
           MIN(minx) AS minx,
           MAX(maxx) AS maxx,
           SUM(sumx) AS sumx
-        FROM sd_train
+        FROM sd_train JOIN m_simulation ON sd_train.simulationid = m_simulation.id
+        WHERE m_simulation.experimentid = $3
         GROUP BY cellid
       ) AS sd_train ON m_cell.id = sd_train.cellid
   `;
-  return pool.query(query, [cellType, limit])
+  return pool.query(query, [cellType, limit, experimentId])
     .then(res => res.rows)
     .catch(e => console.error(e.stack));
 };
@@ -63,6 +64,16 @@ exports.getCellByCoordinates = (cellType, lat, lon) => {
     .then(res => res.rows[0])
     .catch(e => console.error(e.stack));
 };
+
+exports.getCellTypes = () => {
+  const query = `
+    SELECT *
+    FROM m_celltype
+  `;
+  return pool.query(query)
+    .then(res => res.rows)
+    .catch(e => console.error(e.stack));
+}
 
 
 exports.getExperiment = experimentId => {
