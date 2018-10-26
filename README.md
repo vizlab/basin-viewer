@@ -1,42 +1,38 @@
-# basin-viewer
+# SEAL-Visualizer
 
 SI-CAT project
 
-## Setup
-
-### Preparation
+## Server Setup
 
 ```shell-session
+$ cd server
+
 $ npm install
+
+$ export PGHOST=''
+$ export PGUSER=''
+$ export PGDATABASE=''
+$ export PGPASSWORD=''
+$ export PGPORT=5432
+
+$ npm start
+
 ```
 
-### ENVs
-```
-export PGHOST=""
-export PGUSER=""
-export PGDATABASE=""
-export PGPASSWORD=""
-export PGPORT=5432
-export USER="" # Basic auth
-export PASS="" # Basic auth
-```
+## Client Setup
 
-### Watch Client Code
+Run the following command and open http://localhost:8090/ .
 
-```shell-session
-$ npm run watch
+```
+$ cd client
+
+$ npm install
+
+$ npm start
 ```
 
 ### Production Build
 
 ```shell-session
 $ npm run build
-```
-
-### Run Server
-
-Run the following command and open http://localhost:3000/ .
-
-```shell-session
-$ npm start
 ```

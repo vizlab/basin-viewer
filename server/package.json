@@ -1,0 +1,26 @@
+{
+  "name": "seal-v-api",
+  "description": "SI-CAT project",
+  "version": "1.0.0",
+  "contributors": [
+    "Takao NAITO <xarsh@outlook.com>",
+    "Yosuke Onoue <onoue@likr-lab.com>",
+    "Shinsuke Imai <imaishinsuke@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "nodemon server.js",
+    "proxy": "cloud_sql_proxy -instances=vizlab-crest:asia-northeast1:sicat-d4pdf=tcp:5432"
+  },
+  "dependencies": {
+    "basic-auth-connect": "^1.0.0",
+    "express": "^4.15.4",
+    "lodash": "^4.17.5",
+    "pg": "^7.4.0",
+    "wkx": "^0.4.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  }
+}

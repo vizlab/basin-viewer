@@ -1,5 +1,4 @@
 const express = require('express');
-const basicAuth = require('basic-auth-connect');
 const app = express();
 const path = require('path');
 const wkx = require('wkx');
@@ -24,13 +23,7 @@ const {
 } = require('./sicat-db');
 const {ensureUTC} = require('./date');
 
-app.all('/', basicAuth((user, pass) => {
-  return process.env.USER === user && process.env.PASS === pass;
-}));
-
 app.use('/dist', express.static('dist'));
-
-app.get('/', (req, res) => res.sendFile(path.join(`${__dirname}/index.html`)));
 
 app.get('/experiments', async (req, res) => {
   const experiments = await getExperiments();

@@ -1,5 +1,6 @@
 .DS_Store
-node_modules/
-dist/
+node_modules
+client/public/build.js
+client/public/vendor
 npm-debug.log
 yarn-error.log
