@@ -53,7 +53,6 @@ const config = {
         }
       }
     },
-    historyApiFallback: true,
     port: 8090
   },
   plugins: [

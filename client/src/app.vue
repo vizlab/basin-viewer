@@ -81,7 +81,7 @@ export default {
   },
   mounted () {
     this.selectedCellType = 1;
-    fetch('/api/experiments')
+    fetch('api/experiments')
       .then(res => res.json())
       .then(data => {
         this.experiments = data;
@@ -142,7 +142,7 @@ export default {
 
       const params = new URLSearchParams();
       params.set('experimentId', this.selectedExperimentId);
-      fetch(`/api/simulations?${params.toString()}`)
+      fetch(`api/simulations?${params.toString()}`)
         .then(res => res.json())
         .then(data => {
           this.simulations = data;
@@ -153,7 +153,7 @@ export default {
       const params = new URLSearchParams();
       params.set('cellType', this.selectedCellType);
       params.set('limit', 200);
-      fetch(`/api/cells?${params.toString()}`)
+      fetch(`api/cells?${params.toString()}`)
         .then(res => res.json())
         .then(data => {
           this.cells = data;

@@ -41,7 +41,7 @@ const fetchEvents = (cellId, simulationIds, start, end) => {
   params.set('startDate', start);
   params.set('endDate', end);
   params.set('days', 3);
-  return fetch(`/api/events?${params.toString()}`)
+  return fetch(`api/events?${params.toString()}`)
     .then(res => res.json())
     .then(data => data.events);
 };
@@ -54,7 +54,7 @@ const fetchData = (cellId, simulationId, start, end) => {
   params.set('endDate', end);
   params.set('range', 'hour');
   params.set('measure', 'avg');
-  return fetch(`/api/rains?${params.toString()}`)
+  return fetch(`api/rains?${params.toString()}`)
     .then(res => res.json())
     .then(data => {
       data.labels = data.labels.map(s => {

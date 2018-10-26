@@ -14,7 +14,6 @@
     "proxy": "cloud_sql_proxy -instances=vizlab-crest:asia-northeast1:sicat-d4pdf=tcp:5432"
   },
   "dependencies": {
-    "basic-auth-connect": "^1.0.0",
     "express": "^4.15.4",
     "lodash": "^4.17.5",
     "pg": "^7.4.0",
